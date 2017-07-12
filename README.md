@@ -1,2 +1,2 @@
 # afterburner
-Command-line program for learning spoken human languages
+One of the faster ways to learn a spoken human languages. A command line program.
