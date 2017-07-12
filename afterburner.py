@@ -160,15 +160,22 @@ def ask_for_user_quality_estimate(uuid_of_phrase):
 ###################################################################################################
 ###################################################################################################
 
+## Gang up a bunch of the functions above and expose them through a single interface
+def learn_phrase(uuid_of_phrase):
+    print_welcome_screen()
+    display_phrase(uuid_of_phrase)
+    did_user_say_the_phrase = ask_if_user_can_say_phrase(uuid_of_phrase)
+    decide_what_to_do(did_user_say_the_phrase, uuid_of_phrase)
+
 ## Process that user input through some spaced-repetition algo that will decide how long to wait before showing the same clip to the user again
 
 ###################################################################################################
 ###################################################################################################
 ## Call functions in a sensible order
 if __name__ == "__main__":
-    ## Note that I'm just hardcoding the phrase uuid here because I only made a single audio file so far
-    print_welcome_screen()
-    display_phrase(1)
-    did_user_say_the_phrase = ask_if_user_can_say_phrase(1)
-    decide_what_to_do(did_user_say_the_phrase, 1)
-    
+    ## Iterate over our phrases file
+    for index, phrase in phrases.iterrows():
+        # print(phrase)
+        # print(phrase['phrase_uuid'])
+        learn_phrase(phrase['phrase_uuid'])
+        
