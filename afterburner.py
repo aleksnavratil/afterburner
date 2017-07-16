@@ -105,29 +105,29 @@ def play_sound(name_of_audio_file):
     ## Define a constant bitesize
     chunk = 1024
 
-    # open the file for reading.
+    # Open the file for reading.
     wf = wave.open(name_of_audio_file, 'rb')
 
-    # create an audio object
+    # Create an audio object
     p = pyaudio.PyAudio()
 
-    # open stream based on the wave object which has been input.
+    # Open stream based on the wave object which has been input.
     stream = p.open(format =
                     p.get_format_from_width(wf.getsampwidth()),
                     channels = wf.getnchannels(),
                     rate = wf.getframerate(),
                     output = True)
 
-    # read data (based on the chunk size)
+    # Read data (based on the chunk size)
     data = wf.readframes(chunk)
 
-    # play stream (looping from beginning of file to the end)
+    # Play stream (looping from beginning of file to the end)
     while data != '':
-        # writing to the stream is what *actually* plays the sound.
+        # Writing to the stream is what *actually* plays the sound.
         stream.write(data)
         data = wf.readframes(chunk)
 
-    # cleanup stuff.
+    # Cleanup stuff.
     stream.close()    
     p.terminate()
     return(name_of_audio_file)
@@ -246,6 +246,11 @@ def get_name_of_sqlite_table():
 def get_phrases_to_study(name_of_sqlite_table):
     ## In this function, we reorder our phrase db and get N phrases which are due for study
     
+    ## First, let's learn which lesson is currently active
+    current_active_lesson = get_current_active_lesson(name_of_sqlite_table)
+    print('broski')
+    print(current_active_lesson)
+    
     conn = sqlite3.connect(config['path_to_sqlite_file'])
     conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
     c = conn.cursor()
@@ -254,12 +259,15 @@ def get_phrases_to_study(name_of_sqlite_table):
         *
     from
         {{name_of_table}}
+    where
+        lesson = {{current_active_lesson}}
     order by
         timestamp_when_phrase_is_due_for_study desc
     limit 1
     """
     
-    params_to_sub = {'name_of_table' : name_of_sqlite_table}
+    params_to_sub = {'name_of_table' : name_of_sqlite_table
+                   , 'current_active_lesson' : current_active_lesson}
     query = pystache.render(query_template, params_to_sub)
     
     c.execute(query)
@@ -273,48 +281,56 @@ def get_phrases_to_study(name_of_sqlite_table):
 ## Update our study state db
 
 def update_db(phrase, study_due_date):
-    ## In this function, we add our phrase to our sqlite db, which will store our study state
+    ## In this function, we update our phrase in our sqlite db
     conn = sqlite3.connect(config['path_to_sqlite_file'])
     c = conn.cursor()
     
-    upsert_query_template = """
-    INSERT OR REPLACE INTO {{name_of_sqlite_table}} (phrase_uuid,
-                                          phrase_in_known_language,
-                                          literal_translation_from_target_language_to_known_language,
-                                          idiomatic_translation_to_target_language,
-                                          timestamp_when_phrase_is_due_for_study    
-                                          )
-    VALUES ({{uuid}}, '{{phrase}}', '{{literal}}', '{{idomatic}}', '{{time}}');
+    update_query_template = """
+    update {{name_of_sqlite_table}} 
+    set timestamp_when_phrase_is_due_for_study = '{{time}}'
+    where phrase_uuid = {{relevant_uuid}}
+    ;
     """
     params_to_sub = {'name_of_sqlite_table': name_of_sqlite_table
-                   , 'uuid'      : phrase['phrase_uuid']
-                   , 'phrase'    : phrase['phrase_in_known_language']
-                   , 'literal'   : phrase['literal_translation_from_target_language_to_known_language']
-                   , 'idiomatic' : phrase['idiomatic_translation_to_target_language']
-                   , 'time' : study_due_date}
-    upsert_query = pystache.render(upsert_query_template, params_to_sub)
+                   , 'time' : study_due_date
+                   , 'relevant_uuid' : phrase['phrase_uuid']}
+                   
+    update_query = pystache.render(update_query_template, params_to_sub)
 
-    c.execute(upsert_query)
+    c.execute(update_query)
     conn.commit()
     conn.close()
     return(0)
     
     
-def get_current_active_study_flight(name_of_sqlite_table):
-    ## In this function, we ask the db to tell us which study flight the user is currently working on.
-    ## To get this, we just take the highest-numbered study flight that has meaningful due-for-study timestamps
+def get_current_active_lesson(name_of_sqlite_table):
+    ## In this function, we ask the db to tell us which lesson the user is currently working on.
+    ## To get this, we just take the highest-numbered lesson that has meaningful due-for-study timestamps
     
-    get_current_active_study_flight_query_template = """
+    conn = sqlite3.connect(config['path_to_sqlite_file'])
+    conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
+    c = conn.cursor()
+    
+    get_current_active_lesson_query_template = """
     select
-        max(study_flight)
+        max(lesson)
     from
         {{name_of_sqlite_table}}
     where
         timestamp_when_phrase_is_due_for_study != -1
     """
     params_to_sub = {'name_of_sqlite_table' : name_of_sqlite_table}
-    get_current_active_study_flight_query = pystache.render(get_current_active_study_flight_query, params_to_sub)
-    ## TODO: SEND TO DB ETC.
+    get_current_active_lesson_query = pystache.render(get_current_active_lesson_query_template, params_to_sub)
+    
+    c.execute(get_current_active_lesson_query)
+    result = c.fetchone()
+    
+    conn.commit()
+    conn.close()
+    result = result[0] ## Just get the integer we care about
+    if(result == None): ## If this happens, it means we haven't learned any phrases yet
+        result = 0 ## Set it to the 0th lesson, aka the easiest one
+    return(result)
 ###################################################################################################
 ###################################################################################################
 ## Gang up a bunch of the functions above and expose them through a single interface
