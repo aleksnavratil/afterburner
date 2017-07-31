@@ -104,34 +104,39 @@ def play_sound(name_of_audio_file):
     ## In this function, we consume as input the uuid of a phrase and play the corresponding audio clip
     ## If we refactor this program to be python3, we should use simpleaudio instead
 
-    ## Define a constant bitesize
-    chunk = 1024
-
     # Open the file for reading.
     wf = wave.open(name_of_audio_file, 'rb')
 
-    # Create an audio object
+    ## Instantiate PyAudio
     p = pyaudio.PyAudio()
 
-    # Open stream based on the wave object which has been input.
-    stream = p.open(format =
-                    p.get_format_from_width(wf.getsampwidth()),
-                    channels = wf.getnchannels(),
-                    rate = wf.getframerate(),
-                    output = True)
+    # Define callback
+    def callback(in_data, frame_count, time_info, status):
+        data = wf.readframes(frame_count)
+        return (data, pyaudio.paContinue)
 
-    # Read data (based on the chunk size)
-    data = wf.readframes(chunk)
+    # Open stream using callback
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True,
+                    stream_callback=callback)
+                    
+    # Start the stream
+    stream.start_stream()
 
-    # Play stream (looping from beginning of file to the end)
-    while data != '':
-        # Writing to the stream is what *actually* plays the sound.
-        stream.write(data)
-        data = wf.readframes(chunk)
+    # Wait for stream to finish
+    while stream.is_active():
+        time.sleep(0.1)
 
-    # Cleanup stuff.
-    stream.close()    
+    # Stop stream
+    stream.stop_stream()
+    stream.close()
+    wf.close()
+
+    # Close PyAudio
     p.terminate()
+    
     return(name_of_audio_file)
     
 ###################################################################################################
@@ -156,8 +161,8 @@ def show_answer(phrase):
         full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
         play_sound(full_path_to_sound_to_play)    
 
-    render_ui()
     handle_audio()
+    render_ui()
 
     # d = multiprocessing.Process(name='gui_stuff', target=render_ui)
     # n = multiprocessing.Process(name='audio_stuff', target=handle_audio)
@@ -196,8 +201,8 @@ def ask_for_user_quality_estimate(phrase):
         full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
         play_sound(full_path_to_sound_to_play)    
 
-    users_quality_estimate = render_ui()
     handle_audio()
+    users_quality_estimate = render_ui()
     return(users_quality_estimate)
 
 ###################################################################################################
@@ -453,3 +458,4 @@ if __name__ == "__main__":
         phrase_to_study = get_phrases_to_study(name_of_sqlite_table, current_active_lesson)
         learn_phrase(phrase_to_study)
     
+    ## TODO's: progress bar, concurrent audio
