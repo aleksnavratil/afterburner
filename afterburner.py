@@ -10,13 +10,17 @@ import pandas as pd ## For importing data from file as a dataframe
 import yaml ## For importing our config file
 import pyaudio ## For playing our audio clips
 import wave ## For playing our audio clips
+# from multiprocessing import Process ## For playing sounds at the same time as we render the UI
+import multiprocessing
+# import threading
 import os ## For constructing file path names
 import sys ## For halting the program if the user runs out of lessons
 import datetime ## To decide when a phrase is due for study
 import time ## For progressbars
-import progressbar ## For progressbars
+# import progressbar ## For progressbars
 import sqlite3 ## For managing the state of the user's phrases
 import pystache ## For sane templating
+from easygui import * ## For user interfaces
 
 ## Load config information from file
 with open("config.yaml", 'r') as config_file:
@@ -33,28 +37,16 @@ pd.set_option('display.width', 1000)
 ###################################################################################################
 
 def print_welcome_screen():
-    ## Print welcome screen
-    welcome_message = """\n\n\n
-    ##############################################################
-    ##############################################################
+    ## In this function, we display a welcome screen to the user
+    welcome_message = """
     Welcome to Afterburner, one of the faster ways to learn 
-    a spoken human language
-    ##############################################################
-    ##############################################################"""
-    print(welcome_message)
+    a spoken human language. Press enter to continue.
+    """
+    title="Afterburner"
+    
+    ## Print a message box on the screen
+    msgbox(welcome_message, title = "Afterburner", ok_button = "Let's go!")
     return(welcome_message)
-
-###################################################################################################
-###################################################################################################
-
-def display_phrase(phrase):
-    ## Display text in the target language
-    print("\n\n\n\nRead this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n")
-    print("\nMeaning :" + phrase['phrase_in_known_language'])
-    print("\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language'])
-    print
-    print
-
 
 ###################################################################################################
 ###################################################################################################
@@ -69,42 +61,38 @@ def show_progress_bar():
 ###################################################################################################
 ###################################################################################################
 
-def ask_if_user_can_say_phrase():
+def ask_if_user_can_say_phrase(phrase):
+    
+    ## In this function, we ask the user whether he said the phrase at all
+    ## (here we ignore how well he said it, and focus only on whether he attempted to say it at all)
     
     ## Display a pair of buttons to determine whether the user can even say the phrase
-    button_text_for_attempted_speech = "I've tried to say this out loud, show me the answer (Press enter)"
-    button_text_for_failure_to_speak = "I don't know, show me the answer (Press spacebar then enter)"
+    button_text_for_attempted_speech = "I've tried to say this out loud, show me the answer"
+    button_text_for_failure_to_speak = "I don't know, show me the answer"
 
-    print(button_text_for_attempted_speech + "          " + button_text_for_failure_to_speak)
-    print
-    print
-    print
+    string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
+    string2 = "\nMeaning :" + phrase['phrase_in_known_language']
+    string3 = "\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language']
+    string4 = "\n\nDid you try to say this out loud?"
+    message = string1 + string2 + string3 + string4
+    title = "Afterburner"
+    choices = [button_text_for_attempted_speech, button_text_for_failure_to_speak]
+    
+    did_user_say_the_phrase = indexbox(message, title, choices)
     # show_progress_bar() ## TODO: FIGURE OUT WHAT TO DO ABOUT THIS
     
-    ## Let the user tell us whether he said the phrase at all (here we ignore how well he said it, and
-    ## focus only on whether he attempted to say it at all)
-
-    while True:
-        did_user_say_the_phrase = raw_input('\n')
-        if did_user_say_the_phrase not in ('', ' '): ## Note that the empty string '' here tests for the enter key, and ' ' tests for the spacebar
-            print("\n\n\nPlease press either enter or spacebar. Try again :)")
-            continue
-        else:
-            break
-
     return(did_user_say_the_phrase)
 
 ###################################################################################################
 ###################################################################################################
 
 def decide_what_to_do(did_user_say_the_phrase, phrase):
-    if(did_user_say_the_phrase == ''):
+    if(did_user_say_the_phrase == 0):
         ## This logical branch corresponds to the case when the user *did say* the phrase
-        show_answer(phrase)
-        user_quality_estimate = ask_for_user_quality_estimate()
+        user_quality_estimate = ask_for_user_quality_estimate(phrase)
         return(user_quality_estimate)
         
-    elif(did_user_say_the_phrase == ' '):
+    elif(did_user_say_the_phrase == 1):
         ## This branch corresponds to the case when the user *failed to say* the phrase
         show_answer(phrase)
         return(0)
@@ -148,34 +136,68 @@ def play_sound(name_of_audio_file):
     
 ###################################################################################################
 ###################################################################################################
-## Display the correct answer, and play an audio clip of the phrase by calling the appropriate function
 def show_answer(phrase):
-    print("\n\n\n\nRead this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n")
-    print("\nMeaning :" + phrase['phrase_in_known_language'])
-    print("\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language'])
-    print("\nAnswer  :" + phrase['idiomatic_translation_to_target_language'])
-    print
-    print
-    name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
-    full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
-    play_sound(full_path_to_sound_to_play)
+    ## In this function, we display the correct answer, and play an audio clip of the phrase by calling the appropriate function
+    ## This is basically only useful if the user *didn't even attempt to say the phrase*
+    
+    def render_ui():    
+        string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
+        string2 = "\nMeaning :" + phrase['phrase_in_known_language']
+        string3 = "\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language']    
+        string4 = "\nAnswer  :" + phrase['idiomatic_translation_to_target_language']
+
+        message = string1 + string2 + string3 + string4
+        title = "Afterburner"
+        msgbox(msg = message, title = "Afterburner", ok_button = "I have said this out loud, show me the next phrase")
+
+    def handle_audio():
+        ## Start playing our sounds asap, since they're the longest-duration thing that happens TODO: FIGURE OUT CONCURRENCY
+        name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
+        full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
+        play_sound(full_path_to_sound_to_play)    
+
+    render_ui()
+    handle_audio()
+
+    # d = multiprocessing.Process(name='gui_stuff', target=render_ui)
+    # n = multiprocessing.Process(name='audio_stuff', target=handle_audio)
+    # d.daemon = True
+    
+    # d.start()
+    # n.start()
+    # Process(target=handle_audio).start()
+    # Process(target=render_ui).start()
+    
+
+    
     return(None)
 
 ###################################################################################################
 ###################################################################################################
 
 ## Take input from the user about how well they said the sentence
-def ask_for_user_quality_estimate():
-    prompt_string_for_user_input = """\n(1) Wrong     (2) Some Mistakes     (3) Shaky     (4) Good     (5) Perfect\n"""
-    print(prompt_string_for_user_input)
+def ask_for_user_quality_estimate(phrase):
+    
+    def render_ui():    
+        string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
+        string2 = "\nMeaning :" + phrase['phrase_in_known_language']
+        string3 = "\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language']    
+        string4 = "\nAnswer  :" + phrase['idiomatic_translation_to_target_language']
 
-    while True:
-        users_quality_estimate = raw_input('How well did you say this?\n')
-        if users_quality_estimate not in ('1', '2', '3', '4', '5'):
-            print("\n\n\nPlease enter a integer between 1 and 5, inclusive. Try again :)")
-            continue
-        else:
-            break
+        message = string1 + string2 + string3 + string4
+        title = "Afterburner"
+        choices = ['Wrong', 'Some Mistakes', 'Shaky', 'Good', 'Perfect']
+        users_quality_estimate = indexbox(msg = message, title = "Afterburner", choices = choices)
+        return(users_quality_estimate)
+
+    def handle_audio():
+        ## Start playing our sounds asap, since they're the longest-duration thing that happens TODO: FIGURE OUT CONCURRENCY
+        name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
+        full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
+        play_sound(full_path_to_sound_to_play)    
+
+    users_quality_estimate = render_ui()
+    handle_audio()
     return(users_quality_estimate)
 
 ###################################################################################################
@@ -188,15 +210,15 @@ def figure_out_when_to_study_next(users_quality_estimate):
     ## At some point, this should be refactored as a real spaced-repetition algo.
     
     users_quality_estimate = int(users_quality_estimate)
-    if(users_quality_estimate <= 1): ## This corresponds to both the case when the user chooses "I don't know how to say this" and also when he tries to say it, but gives himself a grade of 1.
+    if(users_quality_estimate <= 0): ## This corresponds to both the case when the user chooses "I don't know how to say this" and also when he tries to say it, but gives himself a grade of 1.
         study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 1)
-    elif(users_quality_estimate == 2):
+    elif(users_quality_estimate == 1):
         study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 2)
-    elif(users_quality_estimate == 3):
+    elif(users_quality_estimate == 2):
         study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 4)
-    elif(users_quality_estimate == 4):
+    elif(users_quality_estimate == 3):
         study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 8)
-    elif(users_quality_estimate == 5):
+    elif(users_quality_estimate == 4):
         study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 16)
     else:
         print("Something went wrong with the user's quality estimate of how well he said the phrase :(")
@@ -249,8 +271,7 @@ def get_phrases_to_study(name_of_sqlite_table, current_active_lesson):
     params_to_sub = {'name_of_table' : name_of_sqlite_table
                    , 'current_active_lesson' : current_active_lesson}
     query = pystache.render(query_template, params_to_sub)
-    print('doggggyyy')
-    print(query)
+
     c.execute(query)
     result = c.fetchone()
     conn.commit()
@@ -317,8 +338,6 @@ def get_current_active_lesson(name_of_sqlite_table):
     result = result[0] ## Just get the integer we care about
     if(result is None): ## If this happens, it means we haven't learned any phrases yet
         result = 0 ## Set it to the 0th lesson, aka the easiest one
-    print('brooooskidoodle')
-    print(result)
     return(result)
     
     
@@ -356,10 +375,6 @@ def detect_if_new_lesson_needed(name_of_sqlite_table, current_active_lesson):
     
     conn.commit()
     conn.close()
-    
-    print('broooo')
-    print(result)
-    print(type(result))
     
     if(result is None): ## This corresponds to the edge case when we haven't studied any phrases yet, so all the timestamps are -1's
         lesson = current_active_lesson
@@ -408,8 +423,6 @@ def study_remedial_phrases(name_of_sqlite_table, current_active_lesson):
     
     ## Iterate over the phrases we've received here
     for remedial_phrase in result:
-        print('brewwwwww')
-        print(remedial_phrase)
         learn_phrase(remedial_phrase)
     
     return(result)
@@ -418,8 +431,7 @@ def study_remedial_phrases(name_of_sqlite_table, current_active_lesson):
 ###################################################################################################
 ## Gang up a bunch of the functions above and expose them through a single interface
 def learn_phrase(phrase):
-    display_phrase(phrase)
-    did_user_say_the_phrase = ask_if_user_can_say_phrase()
+    did_user_say_the_phrase = ask_if_user_can_say_phrase(phrase)
     users_quality_estimate = decide_what_to_do(did_user_say_the_phrase, phrase)
     delay_till_next_study = figure_out_when_to_study_next(users_quality_estimate)
     update_db(phrase, delay_till_next_study)
@@ -439,7 +451,5 @@ if __name__ == "__main__":
     while True:
         current_active_lesson = detect_if_new_lesson_needed(name_of_sqlite_table, current_active_lesson)
         phrase_to_study = get_phrases_to_study(name_of_sqlite_table, current_active_lesson)
-        print('browskiiiyyy')
-        print(phrase_to_study)
         learn_phrase(phrase_to_study)
     
