@@ -1,7 +1,9 @@
+###################################################################################################
+###################################################################################################
 ## afterburner.py
 ## Monday 10 July 
 ## Aleks Navratil
-## The point of this program is to make a CLI for learning spoken human languages
+## The point of this program is to learn spoken human languages
 ## It's substantially a ripoff/extension of language-101.com
 ###################################################################################################
 ###################################################################################################
@@ -10,17 +12,16 @@ import pandas as pd ## For importing data from file as a dataframe
 import yaml ## For importing our config file
 import pyaudio ## For playing our audio clips
 import wave ## For playing our audio clips
-# from multiprocessing import Process ## For playing sounds at the same time as we render the UI
-import multiprocessing
-# import threading
 import os ## For constructing file path names
 import sys ## For halting the program if the user runs out of lessons
 import datetime ## To decide when a phrase is due for study
 import time ## For progressbars
-# import progressbar ## For progressbars
 import sqlite3 ## For managing the state of the user's phrases
 import pystache ## For sane templating
 from easygui import * ## For user interfaces
+
+###################################################################################################
+###################################################################################################
 
 ## Load config information from file
 with open("config.yaml", 'r') as config_file:
@@ -50,6 +51,7 @@ def print_welcome_screen():
 
 ###################################################################################################
 ###################################################################################################
+
 def show_progress_bar():
     ## In this function, we print a visual progressbar to the screen.
     bar = progressbar.ProgressBar()
@@ -57,12 +59,10 @@ def show_progress_bar():
         time.sleep(0.02)
     return(0)
     
-    
 ###################################################################################################
 ###################################################################################################
 
 def ask_if_user_can_say_phrase(phrase):
-    
     ## In this function, we ask the user whether he said the phrase at all
     ## (here we ignore how well he said it, and focus only on whether he attempted to say it at all)
     
@@ -87,6 +87,9 @@ def ask_if_user_can_say_phrase(phrase):
 ###################################################################################################
 
 def decide_what_to_do(did_user_say_the_phrase, phrase):
+    ## In this function, we handle some branching logic based on whether or not the user is 
+    ## sufficiently competent to even attempt the phrase
+    
     if(did_user_say_the_phrase == 0):
         ## This logical branch corresponds to the case when the user *did say* the phrase
         user_quality_estimate = ask_for_user_quality_estimate(phrase)
@@ -97,54 +100,55 @@ def decide_what_to_do(did_user_say_the_phrase, phrase):
         show_answer(phrase)
         return(0)
         
+###################################################################################################
+###################################################################################################
+
+# def play_sound(name_of_audio_file):
+#     ## In this function, we consume as input the uuid of a phrase and play the corresponding audio clip
+#     ## If we refactor this program to be python3, we should use simpleaudio instead
+#
+#     # Open the file for reading.
+#     wf = wave.open(name_of_audio_file, 'rb')
+#
+#     ## Instantiate PyAudio
+#     p = pyaudio.PyAudio()
+#
+#     # Define callback
+#     def callback(in_data, frame_count, time_info, status):
+#         data = wf.readframes(frame_count)
+#         return (data, pyaudio.paContinue)
+#
+#     # Open stream using callback
+#     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+#                     channels=wf.getnchannels(),
+#                     rate=wf.getframerate(),
+#                     output=True,
+#                     stream_callback=callback)
+#
+#     # Start the stream
+#     stream.start_stream()
+#
+#     # Wait for stream to finish
+#     while stream.is_active():
+#         time.sleep(0.1)
+#
+#     # Stop stream
+#     stream.stop_stream()
+#     stream.close()
+#     wf.close()
+#
+#     # Close PyAudio
+#     p.terminate()
+#
+#     return(name_of_audio_file)
     
 ###################################################################################################
 ###################################################################################################
-def play_sound(name_of_audio_file):
-    ## In this function, we consume as input the uuid of a phrase and play the corresponding audio clip
-    ## If we refactor this program to be python3, we should use simpleaudio instead
 
-    # Open the file for reading.
-    wf = wave.open(name_of_audio_file, 'rb')
-
-    ## Instantiate PyAudio
-    p = pyaudio.PyAudio()
-
-    # Define callback
-    def callback(in_data, frame_count, time_info, status):
-        data = wf.readframes(frame_count)
-        return (data, pyaudio.paContinue)
-
-    # Open stream using callback
-    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                    channels=wf.getnchannels(),
-                    rate=wf.getframerate(),
-                    output=True,
-                    stream_callback=callback)
-                    
-    # Start the stream
-    stream.start_stream()
-
-    # Wait for stream to finish
-    while stream.is_active():
-        time.sleep(0.1)
-
-    # Stop stream
-    stream.stop_stream()
-    stream.close()
-    wf.close()
-
-    # Close PyAudio
-    p.terminate()
-    
-    return(name_of_audio_file)
-    
-###################################################################################################
-###################################################################################################
 def show_answer(phrase):
     ## In this function, we display the correct answer, and play an audio clip of the phrase by calling the appropriate function
     ## This is basically only useful if the user *didn't even attempt to say the phrase*
-    ## We grossly mix audio-and-ui related code in a single function here.
+    ## Here we grossly mix audio-and-ui related code in a single function here.
     ## However, there's a good reason for this: It allows us to play the sound at almost
     ## the same time as the UI renders
     
@@ -202,8 +206,9 @@ def show_answer(phrase):
 ###################################################################################################
 
 def ask_for_user_quality_estimate(phrase):
-    ## In this function, we take input from the user about how well they said the sentence
-    ## We grossly mix audio-and-ui related code in a single function.
+    ## In this function, we take input from the user about how well they said the sentence.
+    ## This is basically only useful if the user is *sufficiently competent to even attempt the phrase*
+    ## Here we grossly mix audio-and-ui related code in a single function.
     ## However, there's a good reason for this: It allows us to play the sound at almost
     ## the same time as the UI renders
     
@@ -261,7 +266,6 @@ def ask_for_user_quality_estimate(phrase):
 ###################################################################################################
 ###################################################################################################
 
-## Decide process the user's quality estimate and use it to assign a timestamp when the phrase is next due for study
 def figure_out_when_to_study_next(users_quality_estimate):
     ## In this function, we consume as input the user's estimate of how well he said the phrase.
     ## We emit as output a timestamp, representing when the phrase is next due for study
@@ -285,28 +289,29 @@ def figure_out_when_to_study_next(users_quality_estimate):
     
 ###################################################################################################
 ###################################################################################################
-## Take our .csv file and make a sqlite db out of it
+
 def convert_csv_to_sqlite():
-    ## In this function, we take our phrase csv and send it to a sqlite db
+    ## In this function, we take our phrase csv and make a sqlite db out of it
     ## We'll use this db to store our study state
+    
     conn = sqlite3.connect(config['path_to_sqlite_file'])
     phrases.to_sql(name_of_sqlite_table, conn, if_exists="fail") ## We don't want to overwrite the user's progress
     conn.commit()
     conn.close()
     return("Successfully created a sqlite DB")
+    
 ###################################################################################################
 ###################################################################################################
 
 def get_name_of_sqlite_table():
     ## In this function, we figure out the name of our sqlite table
+    
     name_of_sqlite_table = 'afterburner_' + config['name_of_known_language'] + '_to_' + config['name_of_target_language']
     name_of_sqlite_table = name_of_sqlite_table.lower()
     return(name_of_sqlite_table)
 
 ###################################################################################################
 ###################################################################################################
-
-## Get the top N phrases that are due for study
 
 def get_phrases_to_study(name_of_sqlite_table, current_active_lesson):
     ## In this function, we reorder our phrase db and get N phrases which are due for study
@@ -340,12 +345,13 @@ def get_phrases_to_study(name_of_sqlite_table, current_active_lesson):
         print("Congratulations. You have finished all available lessons for this language pair. The program will now terminate.\n\n")
         sys.exit()
     return(result)
+    
 ###################################################################################################
 ###################################################################################################
-## Update our study state db
 
 def update_db(phrase, study_due_date):
-    ## In this function, we update our phrase in our sqlite db
+    ## In this function, we tell our sqlite db how well we're doing on this phrase
+    
     conn = sqlite3.connect(config['path_to_sqlite_file'])
     c = conn.cursor()
     
@@ -452,6 +458,7 @@ def study_remedial_phrases(name_of_sqlite_table, current_active_lesson):
     ## for study. We'll do this fairly regularly, to make sure nothing slips though the cracks
     ## and ends up forgotten. Note that here we return phrase rows from arbitrary lessons that
     ## have already been studied.
+    
     conn = sqlite3.connect(config['path_to_sqlite_file'])
     conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
     c = conn.cursor()
@@ -487,8 +494,11 @@ def study_remedial_phrases(name_of_sqlite_table, current_active_lesson):
     
 ###################################################################################################
 ###################################################################################################
-## Gang up a bunch of the functions above and expose them through a single interface
+
 def learn_phrase(phrase):
+    ## In this function, we gang up a bunch of the functions above and expose them 
+    ## through a single interface
+
     did_user_say_the_phrase = ask_if_user_can_say_phrase(phrase)
     users_quality_estimate = decide_what_to_do(did_user_say_the_phrase, phrase)
     delay_till_next_study = figure_out_when_to_study_next(users_quality_estimate)
@@ -498,6 +508,7 @@ def learn_phrase(phrase):
 ###################################################################################################
 ###################################################################################################
 ## Call functions in a sensible order
+
 if __name__ == "__main__":
     print_welcome_screen()
     name_of_sqlite_table = get_name_of_sqlite_table()
@@ -511,4 +522,6 @@ if __name__ == "__main__":
         phrase_to_study = get_phrases_to_study(name_of_sqlite_table, current_active_lesson)
         learn_phrase(phrase_to_study)
     
-    ## TODO's: progress bar, concurrent audio
+## TODO's: progress bar
+###################################################################################################
+###################################################################################################
