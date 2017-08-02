@@ -144,8 +144,12 @@ def play_sound(name_of_audio_file):
 def show_answer(phrase):
     ## In this function, we display the correct answer, and play an audio clip of the phrase by calling the appropriate function
     ## This is basically only useful if the user *didn't even attempt to say the phrase*
+    ## We grossly mix audio-and-ui related code in a single function here.
+    ## However, there's a good reason for this: It allows us to play the sound at almost
+    ## the same time as the UI renders
     
     def render_ui():    
+        ## We define this as a nested function to make it easier to see what's going on with the audio stream/printing stuff
         string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
         string2 = "\nMeaning :" + phrase['phrase_in_known_language']
         string3 = "\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language']    
@@ -154,34 +158,54 @@ def show_answer(phrase):
         message = string1 + string2 + string3 + string4
         title = "Afterburner"
         msgbox(msg = message, title = "Afterburner", ok_button = "I have said this out loud, show me the next phrase")
+        
+        
+    # Open the file for reading after figuring out the relevant
+    name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
+    full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
+    wf = wave.open(full_path_to_sound_to_play, 'rb')
 
-    def handle_audio():
-        ## Start playing our sounds asap, since they're the longest-duration thing that happens TODO: FIGURE OUT CONCURRENCY
-        name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
-        full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
-        play_sound(full_path_to_sound_to_play)    
+    ## Instantiate PyAudio
+    p = pyaudio.PyAudio()
 
-    handle_audio()
+    # Define callback
+    def callback(in_data, frame_count, time_info, status):
+        data = wf.readframes(frame_count)
+        return (data, pyaudio.paContinue)
+
+    # Open stream using callback
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True,
+                    stream_callback=callback)
+     
+    ## Now that we've started playing the sound, let's display our UI              
     render_ui()
-
-    # d = multiprocessing.Process(name='gui_stuff', target=render_ui)
-    # n = multiprocessing.Process(name='audio_stuff', target=handle_audio)
-    # d.daemon = True
     
-    # d.start()
-    # n.start()
-    # Process(target=handle_audio).start()
-    # Process(target=render_ui).start()
-    
+    ## Now we switch back to sound-related stuff
+    # Wait for stream to finish
+    while stream.is_active():
+        time.sleep(0.1)
 
-    
-    return(None)
+    # Stop stream
+    stream.stop_stream()
+    stream.close()
+    wf.close()
 
+    # Close PyAudio
+    p.terminate()
+    
+    return(name_of_sound_to_play)          
+    
 ###################################################################################################
 ###################################################################################################
 
-## Take input from the user about how well they said the sentence
 def ask_for_user_quality_estimate(phrase):
+    ## In this function, we take input from the user about how well they said the sentence
+    ## We grossly mix audio-and-ui related code in a single function.
+    ## However, there's a good reason for this: It allows us to play the sound at almost
+    ## the same time as the UI renders
     
     def render_ui():    
         string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
@@ -195,14 +219,43 @@ def ask_for_user_quality_estimate(phrase):
         users_quality_estimate = indexbox(msg = message, title = "Afterburner", choices = choices)
         return(users_quality_estimate)
 
-    def handle_audio():
-        ## Start playing our sounds asap, since they're the longest-duration thing that happens TODO: FIGURE OUT CONCURRENCY
-        name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
-        full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
-        play_sound(full_path_to_sound_to_play)    
 
-    handle_audio()
+    # Open the file for reading after figuring out the relevant
+    name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
+    full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
+    wf = wave.open(full_path_to_sound_to_play, 'rb')
+
+    ## Instantiate PyAudio
+    p = pyaudio.PyAudio()
+
+    # Define callback
+    def callback(in_data, frame_count, time_info, status):
+        data = wf.readframes(frame_count)
+        return (data, pyaudio.paContinue)
+
+    # Open stream using callback
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True,
+                    stream_callback=callback)
+     
+    ## Now that we've started playing the sound, let's display our UI  
     users_quality_estimate = render_ui()
+    
+    ## Having displayed our UI, we now switch back to sound-related stuff
+    # Wait for stream to finish
+    while stream.is_active():
+        time.sleep(0.1)
+
+    # Stop stream
+    stream.stop_stream()
+    stream.close()
+    wf.close()
+
+    # Close PyAudio
+    p.terminate()
+    
     return(users_quality_estimate)
 
 ###################################################################################################
