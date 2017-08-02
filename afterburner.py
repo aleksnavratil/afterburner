@@ -39,10 +39,8 @@ pd.set_option('display.width', 1000)
 
 def print_welcome_screen():
     ## In this function, we display a welcome screen to the user
-    welcome_message = """
-    Welcome to Afterburner, one of the faster ways to learn 
-    a spoken human language. Press enter to continue.
-    """
+    
+    welcome_message = """Welcome to Afterburner, one of the faster ways to learn a spoken human language."""
     title="Afterburner"
     
     ## Print a message box on the screen
@@ -99,48 +97,6 @@ def decide_what_to_do(did_user_say_the_phrase, phrase):
         ## This branch corresponds to the case when the user *failed to say* the phrase
         show_answer(phrase)
         return(0)
-        
-###################################################################################################
-###################################################################################################
-
-# def play_sound(name_of_audio_file):
-#     ## In this function, we consume as input the uuid of a phrase and play the corresponding audio clip
-#     ## If we refactor this program to be python3, we should use simpleaudio instead
-#
-#     # Open the file for reading.
-#     wf = wave.open(name_of_audio_file, 'rb')
-#
-#     ## Instantiate PyAudio
-#     p = pyaudio.PyAudio()
-#
-#     # Define callback
-#     def callback(in_data, frame_count, time_info, status):
-#         data = wf.readframes(frame_count)
-#         return (data, pyaudio.paContinue)
-#
-#     # Open stream using callback
-#     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-#                     channels=wf.getnchannels(),
-#                     rate=wf.getframerate(),
-#                     output=True,
-#                     stream_callback=callback)
-#
-#     # Start the stream
-#     stream.start_stream()
-#
-#     # Wait for stream to finish
-#     while stream.is_active():
-#         time.sleep(0.1)
-#
-#     # Stop stream
-#     stream.stop_stream()
-#     stream.close()
-#     wf.close()
-#
-#     # Close PyAudio
-#     p.terminate()
-#
-#     return(name_of_audio_file)
     
 ###################################################################################################
 ###################################################################################################
@@ -522,6 +478,6 @@ if __name__ == "__main__":
         phrase_to_study = get_phrases_to_study(name_of_sqlite_table, current_active_lesson)
         learn_phrase(phrase_to_study)
     
+###################################################################################################
+###################################################################################################
 ## TODO's: progress bar
-###################################################################################################
-###################################################################################################
