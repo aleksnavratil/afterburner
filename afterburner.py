@@ -10,8 +10,10 @@
 
 import pandas as pd ## For importing data from file as a dataframe
 import yaml ## For importing our config file
-import pyaudio ## For playing our audio clips
-import wave ## For playing our audio clips
+# import pyaudio ## For playing our audio clips
+# import wave ## For playing our audio clips
+# import pyglet ## For playing our audio clips
+import pygame ## For playing our audio clips
 import os ## For constructing file path names
 import sys ## For halting the program if the user runs out of lessons
 import datetime ## To decide when a phrase is due for study
@@ -69,8 +71,8 @@ def ask_if_user_can_say_phrase(phrase):
     button_text_for_failure_to_speak = "I don't know, show me the answer"
 
     string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
-    string2 = "\nMeaning :" + phrase['phrase_in_known_language']
-    string3 = "\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language']
+    string2 = "\nMeaning : " + phrase['phrase_in_known_language']
+    string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']
     string4 = "\n\nDid you try to say this out loud?"
     message = string1 + string2 + string3 + string4
     title = "Afterburner"
@@ -111,9 +113,9 @@ def show_answer(phrase):
     def render_ui():    
         ## We define this as a nested function to make it easier to see what's going on with the audio stream/printing stuff
         string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
-        string2 = "\nMeaning :" + phrase['phrase_in_known_language']
-        string3 = "\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language']    
-        string4 = "\nAnswer  :" + phrase['idiomatic_translation_to_target_language']
+        string2 = "\nMeaning : " + phrase['phrase_in_known_language']
+        string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']    
+        string4 = "\nAnswer  : " + phrase['idiomatic_translation_to_target_language']
 
         message = string1 + string2 + string3 + string4
         title = "Afterburner"
@@ -121,40 +123,16 @@ def show_answer(phrase):
         
         
     # Open the file for reading after figuring out the relevant
-    name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
+    name_of_sound_to_play = str(phrase['phrase_uuid'])
     full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
-    wf = wave.open(full_path_to_sound_to_play, 'rb')
-
-    ## Instantiate PyAudio
-    p = pyaudio.PyAudio()
-
-    # Define callback
-    def callback(in_data, frame_count, time_info, status):
-        data = wf.readframes(frame_count)
-        return (data, pyaudio.paContinue)
-
-    # Open stream using callback
-    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                    channels=wf.getnchannels(),
-                    rate=wf.getframerate(),
-                    output=True,
-                    stream_callback=callback)
-     
+    
+    pygame.mixer.init()
+    pygame.mixer.music.load(full_path_to_sound_to_play)
+    pygame.mixer.music.play()
     ## Now that we've started playing the sound, let's display our UI              
     render_ui()
-    
-    ## Now we switch back to sound-related stuff
-    # Wait for stream to finish
-    while stream.is_active():
-        time.sleep(0.1)
-
-    # Stop stream
-    stream.stop_stream()
-    stream.close()
-    wf.close()
-
-    # Close PyAudio
-    p.terminate()
+    while pygame.mixer.music.get_busy() == True:
+        continue
     
     return(name_of_sound_to_play)          
     
@@ -170,9 +148,9 @@ def ask_for_user_quality_estimate(phrase):
     
     def render_ui():    
         string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
-        string2 = "\nMeaning :" + phrase['phrase_in_known_language']
-        string3 = "\nLiteral :" + phrase['literal_translation_from_target_language_to_known_language']    
-        string4 = "\nAnswer  :" + phrase['idiomatic_translation_to_target_language']
+        string2 = "\nMeaning : " + phrase['phrase_in_known_language']
+        string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']    
+        string4 = "\nAnswer  : " + phrase['idiomatic_translation_to_target_language']
 
         message = string1 + string2 + string3 + string4
         title = "Afterburner"
@@ -181,42 +159,18 @@ def ask_for_user_quality_estimate(phrase):
         return(users_quality_estimate)
 
 
-    # Open the file for reading after figuring out the relevant
-    name_of_sound_to_play = str(phrase['phrase_uuid']) + '.wav'
+    # Open the file for reading after figuring out the relevant id number aka filename
+    name_of_sound_to_play = str(phrase['phrase_uuid'])
     full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
-    wf = wave.open(full_path_to_sound_to_play, 'rb')
 
-    ## Instantiate PyAudio
-    p = pyaudio.PyAudio()
-
-    # Define callback
-    def callback(in_data, frame_count, time_info, status):
-        data = wf.readframes(frame_count)
-        return (data, pyaudio.paContinue)
-
-    # Open stream using callback
-    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                    channels=wf.getnchannels(),
-                    rate=wf.getframerate(),
-                    output=True,
-                    stream_callback=callback)
-     
+    pygame.mixer.init()
+    pygame.mixer.music.load(full_path_to_sound_to_play)
+    pygame.mixer.music.play()
     ## Now that we've started playing the sound, let's display our UI  
     users_quality_estimate = render_ui()
-    
-    ## Having displayed our UI, we now switch back to sound-related stuff
-    # Wait for stream to finish
-    while stream.is_active():
-        time.sleep(0.1)
-
-    # Stop stream
-    stream.stop_stream()
-    stream.close()
-    wf.close()
-
-    # Close PyAudio
-    p.terminate()
-    
+    while pygame.mixer.music.get_busy() == True:
+        continue
+        
     return(users_quality_estimate)
 
 ###################################################################################################
