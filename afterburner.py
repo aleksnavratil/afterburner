@@ -10,9 +10,6 @@
 
 import pandas as pd ## For importing data from file as a dataframe
 import yaml ## For importing our config file
-# import pyaudio ## For playing our audio clips
-# import wave ## For playing our audio clips
-# import pyglet ## For playing our audio clips
 import pygame ## For playing our audio clips
 import os ## For constructing file path names
 import sys ## For halting the program if the user runs out of lessons
@@ -439,3 +436,4 @@ if __name__ == "__main__":
 # * Use a better GUI system that doesn't flicker every time you click something
 # * Figure out how to get audio from movies/tv/radio and two-language-track closed-captions, in order to prevent us from having to pay for native speakers
 # * Get the phraselist from http://frequencylists.blogspot.com/2016/08/5000-italian-sentences-sorted-from.html
+# * Implement a naive machine translation?
