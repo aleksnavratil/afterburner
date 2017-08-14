@@ -2,5 +2,5 @@
 
 name_of_known_language : English
 name_of_target_language : Italian
-name_of_phrases_csv : phrases_english_to_italian.csv
+name_of_phrases_csv : /Users/aleks/repos/afterburner/assets/afterburner_inputs_english_to_italian_part_1.csv
 path_to_sqlite_file : ./afterburner_english_to_italian.sqlite

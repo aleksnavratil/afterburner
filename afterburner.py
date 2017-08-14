@@ -28,7 +28,7 @@ with open("config.yaml", 'r') as config_file:
     config = yaml.load(config_file)
 
 ## Load phrase text from file
-phrases = pd.read_csv(config['name_of_phrases_csv'])
+phrases = pd.read_csv(config['name_of_phrases_csv'], encoding = 'utf8')
     
 ## For debug
 pd.set_option('display.max_columns', 500)
@@ -480,4 +480,8 @@ if __name__ == "__main__":
     
 ###################################################################################################
 ###################################################################################################
-## TODO's: progress bar
+## TODO's: 
+# * Add 10 second progress bar while the user is trying to say the phrase
+# * Use a better GUI system that doesn't flicker every time you click something
+# * Figure out how to get audio from movies/tv/radio and two-language-track closed-captions, in order to prevent us from having to pay for native speakers
+# * Get the phraselist from http://frequencylists.blogspot.com/2016/08/5000-italian-sentences-sorted-from.html
