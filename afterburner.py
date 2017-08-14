@@ -437,3 +437,4 @@ if __name__ == "__main__":
 # * Figure out how to get audio from movies/tv/radio and two-language-track closed-captions, in order to prevent us from having to pay for native speakers
 # * Get the phraselist from http://frequencylists.blogspot.com/2016/08/5000-italian-sentences-sorted-from.html
 # * Implement a naive machine translation?
+# * Write code to load in a .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
