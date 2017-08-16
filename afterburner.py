@@ -204,7 +204,7 @@ def ask_for_user_quality_estimate(phrase):
     ## the same time as the UI renders
     
     def render_ui():    
-        string1 = "Read this " + cart_config['name_of_known_language'] + " phrase, then say the " + cart_config['name_of_target_language'] + " equivalent out loud.\n"
+        string1 = "How well did you say the phrase?\n"
         string2 = "\nMeaning : " + phrase['phrase_in_known_language']
         string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']    
         string4 = "\nAnswer  : " + phrase['idiomatic_translation_to_target_language']
@@ -509,6 +509,6 @@ if __name__ == "__main__":
 # * Figure out how to get audio from movies/tv/radio and two-language-track closed-captions, in order to prevent us from having to pay for native speakers
 # DONE * Get the phraselist from http://frequencylists.blogspot.com/2016/08/5000-italian-sentences-sorted-from.html
 # * Implement a naive machine translation?
-# * Build facilities for loading fully-modularized .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
+# DONE * Build facilities for loading fully-modularized .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
 # * Print study stats, such as total hours studied, what lesson you're on, how many phrases fall into each bucket, etc.
 # * Package afterburner as a standalone program
