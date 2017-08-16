@@ -5,7 +5,7 @@ You might also be interested in the "Afterburner Cartridge Factory" helper progr
 
 ## What's the point of this program
 
-The point of this program is to teach you to be plausibly conversant in a spoken human language, such as Italian or Polish. This program is substantially an open-source clone/blatant ripoff of [language101.com]'s excellent software. It is designed such that it can work with many languages, but the only one that's built so far is Italian.
+The point of this program is to teach you to be plausibly conversant in a spoken human language, such as Italian or Polish. This program is substantially an open-source clone/blatant ripoff of [language101.com](https://language101.com/)'s excellent software. It is designed such that it can work with many languages, but the only one that's built so far is Italian.
 
 ## Pedagogical philosophy
 Afterburner is Opinionated Software (tm), designed around the idea that there is a right way and a wrong way to learn a language. 
