@@ -8,7 +8,12 @@ You might also be interested in the "Afterburner Cartridge Factory" helper progr
 The point of this program is to teach you a spoken human language, such as Italian or Polish. This program is substantially an open-source clone/blatant ripoff of [language101.com]'s excellent software. It is designed such that it can work with many languages, but the only one that's built so far is Italian.
 
 ## Pedagogical philosophy
-Afterburner is Opinionated Software (tm) in that it is designed around the idea that there is a right way and a wrong way to learn a language. In learning a language, there are many skills that can be trained. Here are some examples of trainable skills, using Italian as the target language and English as the known language.
+Afterburner is Opinionated Software (tm), designed around the idea that there is a right way and a wrong way to learn a language. 
+
+#### Background
+Every language learning system works, it's just that some work faster than others. Some systems work so slowly that they're nearly indistinguishable from no instruction at all. Afterburner is one of the faster systems --- but why does it work faster than others?
+
+Many skills can be trained during language learning. Here are some examples of trainable skills, using Italian as the target language and English as the known language.
  
 * Reading and comprehending written Italian
 * Translating written Italian to written English
@@ -17,13 +22,13 @@ Afterburner is Opinionated Software (tm) in that it is designed around the idea 
 * Filling in the missing words in an Italian sentence, like in the CLOZE exam or MadLibs
 * ... etc ... 
 
-There are a large number of these skills; if you spend any time with the common language learning systems such as Rosetta Stone or DuoLingo or whatever, you'll find endless variations on these skills. However, it turns out that in practice, almost none of these skills matter. In fact, for becoming passably conversational, only two skills matter:
+There are a large number of these skills; if you spend any time with the common language learning systems such as Rosetta Stone or DuoLingo or whatever, you'll find endless variations on these skills, probably ten or twenty or more. However, it turns out that in practice, almost none of these skills matter. In fact, for becoming passably conversational, only two skills matter:
 
-Important Skill #1. Reading written English, and translating to *spoken out loud Italian*
+*Important Skill #1:* Reading written English, and translating to *spoken out loud Italian*
 
 and
 
-Important Skill #2. Listening to and comprehending spoken Italian
+*Important Skill #2:* Listening to and comprehending spoken Italian
 
 It turns out that if you master these two skills, you *get all the other skills for free*. Curiously, many heavily-advertised language learning systems spend zero to five percent of their time training these two skills. And it turns out that your learning rate is almost exactly predicted by the fraction of your time spent training these skills. So as a rule of thumb, most popular language learning systems are wasting ~95% of your time. That's why Afterburner works so much faster than other systems.
 
@@ -40,6 +45,21 @@ A. True, nothing works for everybody. However, brief and highly non-scientific r
 
 
 
+
+Q. Ok, I believe your theory about Important Skills #1 and #2, but why are rival language systems designed around such glaring ignorance/misunderstandings of human language cognition?
+
+A. They're here to take your money/get their KPI's up, not teach you a language. How do you think they can afford all those shiny ads in Conde Nast magazines? Their business model doesn't depend on you actually learning anything.
+
+
+
+
+Q. Ok, this looks great. Does it work for my language of interest X, which is written left to write/top to bottom/with super-exotic glyphs or in a very unusual character set?
+
+A. Ummm. I am probably not smart enough to reason about your vertically-written language. That said, Afterburner is Unicode all the way down, so in general it might be expected to approximately work. However, I make no promises about whether the UI can render your character set in an intelligible vertical order.
+
+
+
+
 Q. But I'm a visual learner/tactile learner/whatever other BS they taught you in elementary school.
 
 A. No you're not, there's no such thing. The "learning styles" myth is peristent and sticky but wholly debunked, see e.g. [here](https://www.teachermagazine.com.au/articles/tackling-the-learning-styles-myth) or [here](http://journal.frontiersin.org/article/10.3389/fpsyg.2015.01908/full) or any of the many many other readily-available and very thorough debunkings.
@@ -50,6 +70,7 @@ A. No you're not, there's no such thing. The "learning styles" myth is peristent
 Q. Your user interface looks like it was built by a small, not very bright child.
 
 A. Yes, you're right. At some point I might learn how to write a better one. Bear in mind that the point of this program is to display text and play .mp3 files. Rocket science this is not, and a minimal interface kinda suits the application.
+
 
 
 
@@ -73,9 +94,11 @@ In general, if Language101.com supports your language pair, you should buy it an
 
 
 
+
 Q. So should I buy Language101 or not? It seems kind of expensive.
 
 A. You should buy it, it's worth every penny. It's hands-down the best available language learning pedagogy on the market. It's better than Afterburner, which is just a poor-man's ripoff of it.
+
 
 
 
@@ -85,9 +108,25 @@ A. Nope, just a satisfied customer who wishes they supported more languages and 
 
 
 
+
 Q. But I saw a fancy yellow ad for Rosetta Stone, shouldn't I buy that instead!?
 
 A. I mean, it's your money and your time. But I solemnly promise you will *never* learn your target language to a conversational level by using Rosetta Stone alone. It works so slowly that a single human lifetime is not enough time to learn any language with it. 
+
+
+
+
+Q. How do you know Afterburner is better than alternative system X, have you tried it?
+
+A. In general yes, I have tried most of the widely-available language systems out there, including academic classes, Rosetta Stone, DuoLingo, Anki, Fluenz, Language101, etc. Most of them work, but some work faster than others. In general you should find the combination of tools that maximizes your learning rate, and use that toolset to the exclusion of all others. 
+
+
+
+
+Q. Will Afterburner teach me to write eloquently in my target language?
+
+A. No, it's for becoming minimally conversational. The idea is to get you to the point where immersion is a time-effective pedagogy. 
+
 
 
 
@@ -116,6 +155,8 @@ A. In the 90's, when you bought a Nintendo, you had to also buy some games, whic
 The contents of each cartridge file is just a bunch of .mp3's with numerical filenames such as 3465 or 295, with no file extensions, and a .sqlite database containing some text in both the known and target languages. The sqlite db just tells Afterburner which text goes with which audio files. 
 
 You can find the canonical list of available cartridges [here](TODO: FIGURE OUT WHERE TO HOST CARTRIDGE FILES)
+
+
 
 
 Q. Why are there no study stats, showing e.g. my total study duration?
