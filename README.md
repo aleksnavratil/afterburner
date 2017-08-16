@@ -1,5 +1,5 @@
 # afterburner
-_One of the faster ways to learn a spoken human languages._
+_One of the faster ways to learn a spoken human language._
 
 You might also be interested in the "Afterburner Cartridge Factory" helper program for constructing afterburner cartridges, which is [here](https://github.com/aleksnavratil/afterburner-cartridge-factory). Note that currently "factory" is a bit of a misnomer, since cartridge construction is still pretty manual.
 
