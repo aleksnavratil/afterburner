@@ -63,8 +63,13 @@ def unzip_cartridge_file(path_to_cartridge_file):
     ## In this function, we consume as input the path to the cartridge file from the config file.
     ## We unzip this cartridge file into an assets directory which will eventually contain
     ## .mp3's and a .csv and a .sqlite db
-        
-    ## First, unzip the cartridge file:
+    loading_message = """"Since we're running this cartridge for the first time, afterburner is now unpacking the cartridge. This will take a couple minutes."""
+    title="Afterburner cartridge loading"
+    
+    ## Print a message box on the screen explaining why this takes so long
+    msgbox(loading_message, title = title)
+    
+    ## Now unzip the cartridge file:
     ## Get the parent directory of wherever the cartridge is
     directory_to_unzip_into = os.path.dirname(path_to_cartridge_file)
     
@@ -482,12 +487,12 @@ def learn_phrase(phrase):
 ## Call functions in a sensible order
 
 if __name__ == "__main__":
+    if not os.path.isdir(get_path_to_assets_dir()): ## If we're running for the first time, we can unpack our cartridge zip. Otherwise, we can skip this step
+        unzip_cartridge_file(get_path_to_cartridge_file())
     cart_config = load_cartridge_specific_config() ## Figure out the names of our languages etc.
     print_welcome_screen()
     path_to_sqlite_db = get_path_to_sqlite_db()
     name_of_sqlite_table = config['cartridge_name']
-    if not os.path.isdir(get_path_to_assets_dir()): ## If we're running for the first time, we can unpack our cartridge zip. Otherwise, we can skip this step
-        unzip_cartridge_file(get_path_to_cartridge_file())
     current_active_lesson = get_current_active_lesson(name_of_sqlite_table)
     
     ## Get a phrase to study
