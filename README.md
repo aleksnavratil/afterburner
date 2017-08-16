@@ -11,7 +11,7 @@ The point of this program is to teach you to be plausibly conversant in a spoken
 Afterburner is Opinionated Software (tm), designed around the idea that there is a right way and a wrong way to learn a language. 
 
 #### Background
-Every language learning system works, it's just that some work faster than others. Some systems work so slowly that they're nearly indistinguishable from no instruction at all. Afterburner is one of the faster systems --- but why does it work faster than others?
+Every language learning system works, but some work faster than others. Some systems work so slowly that they're nearly indistinguishable from no instruction at all. Afterburner is one of the faster systems --- but why does it work faster than others?
 
 Many skills can be trained during language learning. Here are some examples of trainable skills, using Italian as the target language and English as the known language.
  
@@ -167,3 +167,10 @@ A. Will build soon, hang tight.
 
 ## Explanation of the files in this repo
 
+* `afterburner.py` is the main executable file. It's structured in three chunks. There's a headers section, wherein we import various libraries and load some config info from file. Then there are a bunch of function definitions, and finally a main method.
+
+* `config.yaml` is a user-adjustable configuration file. Basically this is where you tell Afterburner where your cartridge file is. This can be anywhere, but it's common to make a subdirectory underneath the `whatever_your_path_is/afterburner` repo called something like `cartridge_library`. 
+
+## How to run this software
+
+TODO: FILL THIS IN
