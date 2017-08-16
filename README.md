@@ -1,8 +1,6 @@
 # afterburner
 _One of the faster ways to learn a spoken human language._
 
-You might also be interested in the "Afterburner Cartridge Factory" helper program for constructing afterburner cartridges, which is [here](https://github.com/aleksnavratil/afterburner-cartridge-factory). Note that currently "factory" is a bit of a misnomer, since cartridge construction is still pretty manual.
-
 ## What's the point of this program
 
 The point of this program is to teach you to be plausibly conversant in a spoken human language, such as Italian or Polish. This program is substantially an open-source clone/blatant ripoff of [language101.com](https://language101.com/)'s excellent software. It is designed such that it can work with many languages, but the only one that's built so far is Italian.
@@ -174,3 +172,7 @@ A. Will build soon, hang tight.
 ## How to run this software
 
 TODO: FILL THIS IN
+
+Note that we assume you have a cartridge file already downloaded and stored somewhere on your local machine. 
+
+You might also be interested in the "Afterburner Cartridge Factory" helper program for constructing afterburner cartridges, which is [here](https://github.com/aleksnavratil/afterburner-cartridge-factory). Note that currently "factory" is a bit of a misnomer, since cartridge construction is still pretty manual.
