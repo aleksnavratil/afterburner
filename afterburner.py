@@ -8,13 +8,11 @@
 ###################################################################################################
 ###################################################################################################
 
-import pandas as pd ## For importing data from file as a dataframe
 import yaml ## For importing our config file
 import pygame ## For playing our audio clips
 import os ## For constructing file path names
 import sys ## For halting the program if the user runs out of lessons
 import datetime ## To decide when a phrase is due for study
-import time ## For progressbars
 import sqlite3 ## For managing the state of the user's phrases
 import pystache ## For sane templating
 from easygui import * ## For user interfaces
@@ -24,13 +22,11 @@ import zipfile ## For unzipping our cartridge files
 ###################################################################################################
 ###################################################################################################
 
-## Load config information from file. We'll later load cart-specific config info from another similar file
+## Load config information from file. This is where we learn where the cartridge is stored.
+## We'll later load cart-specific config info from another
+## similar file.
 with open("config.yaml", 'r') as config_file:
     config = yaml.load(config_file)
-        
-## For debug
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.width', 1000)
 
 ###################################################################################################
 ###################################################################################################
@@ -105,16 +101,6 @@ def load_cartridge_specific_config():
         cart_config = yaml.load(cart_config_file)
 
     return(cart_config)
-    
-###################################################################################################
-###################################################################################################
-
-# def show_progress_bar():
-#     ## In this function, we print a visual progressbar to the screen.
-#     bar = progressbar.ProgressBar()
-#     for i in bar(range(500)): ## On my machine, this gives us a roughly 10-second progress bar, which is what we want
-#         time.sleep(0.02)
-#     return(0)
     
 ###################################################################################################
 ###################################################################################################
@@ -253,30 +239,6 @@ def figure_out_when_to_study_next(users_quality_estimate):
         print("Something went wrong with the user's quality estimate of how well he said the phrase :(")
         study_due_date = -1  
     return(study_due_date)
-    
-# ###################################################################################################
-# ###################################################################################################
-#
-# def convert_csv_to_sqlite():
-#     ## In this function, we take our phrase csv and make a sqlite db out of it
-#     ## We'll use this db to store our study state. This function will only be run the first time afterburner loads.
-#     ## Before we load it, we'll have to unpack our .zip archive into an assets dir, which is itself in the cart library (for now at least)
-#
-#     path_to_cart_file = get_path_to_cartridge_file()
-#     path_to_cart_library = unzip_cartridge_file(path_to_cart_file)
-#
-#     path_to_assets_dir = get_path_to_assets_dir()
-#     path_to_phrases_csv = os.path.join(path_to_assets_dir, config['cartridge_name'] + '.csv')
-#     phrases = pd.read_csv(path_to_phrases_csv, encoding = 'utf8') ## Load phrase text from file
-#
-#     path_to_sqlite_file = os.path.join(path_to_assets_dir, config['cartridge_name'] + '.sqlite')
-#     conn = sqlite3.connect(path_to_sqlite_file)
-#
-#     path_to_sqlite_db = config['cartridge_name']
-#     phrases.to_sql(path_to_sqlite_db, conn, if_exists="fail") ## We don't want to overwrite the user's progress
-#     conn.commit()
-#     conn.close()
-#     return("Successfully created a sqlite DB")
     
 ###################################################################################################
 ###################################################################################################
