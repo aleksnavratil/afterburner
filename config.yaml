@@ -1,6 +1,9 @@
 ## Config file for afterburner.py
 
-name_of_known_language : English
-name_of_target_language : Italian
-name_of_phrases_csv : /Users/aleks/repos/afterburner/assets/afterburner_inputs_english_to_italian_part_1.csv
-path_to_sqlite_file : ./afterburner_english_to_italian.sqlite
+## It's common to make a subdirectory within your whatever/afterburner directory," like this:
+## whatever/afterburner/cartridge_library
+## and then put your cartridge zips in there. But really it doesn't matter where you keep your cartridge files, 
+## they can be anywhere.
+absolute_path_to_cartridge_library : /Users/aleks/repos/afterburner/cartridge_library
+cartridge_name : afterburner_english_to_italian_1
+

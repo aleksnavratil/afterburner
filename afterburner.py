@@ -18,17 +18,16 @@ import time ## For progressbars
 import sqlite3 ## For managing the state of the user's phrases
 import pystache ## For sane templating
 from easygui import * ## For user interfaces
+import zipfile ## For unzipping our cartridge files
+
 
 ###################################################################################################
 ###################################################################################################
 
-## Load config information from file
+## Load config information from file. We'll later load cart-specific config info from another similar file
 with open("config.yaml", 'r') as config_file:
     config = yaml.load(config_file)
-
-## Load phrase text from file
-phrases = pd.read_csv(config['name_of_phrases_csv'], encoding = 'utf8')
-    
+        
 ## For debug
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
@@ -49,12 +48,68 @@ def print_welcome_screen():
 ###################################################################################################
 ###################################################################################################
 
-def show_progress_bar():
-    ## In this function, we print a visual progressbar to the screen.
-    bar = progressbar.ProgressBar()
-    for i in bar(range(500)): ## On my machine, this gives us a roughly 10-second progress bar, which is what we want
-        time.sleep(0.02)
-    return(0)
+def get_path_to_cartridge_file():
+    ## In this function, we construct and return the absolute path to the cartridge file
+    
+    path_to_cartridge_library = config['absolute_path_to_cartridge_library']
+    name_of_cartridge_file = config['cartridge_name'] + '.zip'
+    absolute_path_to_cartridge_file = os.path.join(path_to_cartridge_library, name_of_cartridge_file)
+    return(absolute_path_to_cartridge_file)
+    
+###################################################################################################
+###################################################################################################
+
+def unzip_cartridge_file(path_to_cartridge_file):
+    ## In this function, we consume as input the path to the cartridge file from the config file.
+    ## We unzip this cartridge file into an assets directory which will eventually contain
+    ## .mp3's and a .csv and a .sqlite db
+        
+    ## First, unzip the cartridge file:
+    ## Get the parent directory of wherever the cartridge is
+    directory_to_unzip_into = os.path.dirname(path_to_cartridge_file)
+    
+    zip_ref = zipfile.ZipFile(path_to_cartridge_file, 'r')
+    zip_ref.extractall(directory_to_unzip_into)
+    zip_ref.close()
+    
+    return(directory_to_unzip_into)
+
+###################################################################################################
+###################################################################################################
+
+def get_path_to_assets_dir():
+    ## In this function, we get the path to the assets directory in which the cart file was unzipped.
+    ## This is just a convenience function which is substantially similar to get_path_to_cartridge_file().
+    ## It returns the same thing but without a .zip extension
+    
+    path_to_cartridge_library = config['absolute_path_to_cartridge_library']
+    name_of_assets_dir = config['cartridge_name']
+    absolute_path_to_assets_dir= os.path.join(path_to_cartridge_library, name_of_assets_dir)
+    return(absolute_path_to_assets_dir)
+
+###################################################################################################
+###################################################################################################
+
+def load_cartridge_specific_config():
+    ## Having unzipped our cart, we should have an /assets directory. We can get the
+    ## cartridge specific config file out of here and load it.
+
+    path_to_assets_dir = get_path_to_assets_dir()
+    absolute_path_to_cart_config = os.path.join(path_to_assets_dir, 'cartridge_specific_config.yaml')
+    with open(absolute_path_to_cart_config, 'r') as cart_config_file:
+        cart_config = yaml.load(cart_config_file)
+
+    return(cart_config)
+    
+###################################################################################################
+###################################################################################################
+
+# def show_progress_bar():
+#     ## In this function, we print a visual progressbar to the screen.
+#     bar = progressbar.ProgressBar()
+#     for i in bar(range(500)): ## On my machine, this gives us a roughly 10-second progress bar, which is what we want
+#         time.sleep(0.02)
+#     return(0)
     
 ###################################################################################################
 ###################################################################################################
@@ -67,7 +122,7 @@ def ask_if_user_can_say_phrase(phrase):
     button_text_for_attempted_speech = "I've tried to say this out loud, show me the answer"
     button_text_for_failure_to_speak = "I don't know, show me the answer"
 
-    string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
+    string1 = "Read this " + cart_config['name_of_known_language'] + " phrase, then say the " + cart_config['name_of_target_language'] + " equivalent out loud.\n"
     string2 = "\nMeaning : " + phrase['phrase_in_known_language']
     string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']
     string4 = "\n\nDid you try to say this out loud?"
@@ -109,7 +164,7 @@ def show_answer(phrase):
     
     def render_ui():    
         ## We define this as a nested function to make it easier to see what's going on with the audio stream/printing stuff
-        string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
+        string1 = "Read this " + cart_config['name_of_known_language'] + " phrase, then say the " + cart_config['name_of_target_language'] + " equivalent out loud.\n"
         string2 = "\nMeaning : " + phrase['phrase_in_known_language']
         string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']    
         string4 = "\nAnswer  : " + phrase['idiomatic_translation_to_target_language']
@@ -121,7 +176,7 @@ def show_answer(phrase):
         
     # Open the file for reading after figuring out the relevant
     name_of_sound_to_play = str(phrase['phrase_uuid'])
-    full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
+    full_path_to_sound_to_play = os.path.join(get_path_to_assets_dir(), name_of_sound_to_play)
     
     pygame.mixer.init()
     pygame.mixer.music.load(full_path_to_sound_to_play)
@@ -144,7 +199,7 @@ def ask_for_user_quality_estimate(phrase):
     ## the same time as the UI renders
     
     def render_ui():    
-        string1 = "Read this " + config['name_of_known_language'] + " phrase, then say the " + config['name_of_target_language'] + " equivalent out loud.\n"
+        string1 = "Read this " + cart_config['name_of_known_language'] + " phrase, then say the " + cart_config['name_of_target_language'] + " equivalent out loud.\n"
         string2 = "\nMeaning : " + phrase['phrase_in_known_language']
         string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']    
         string4 = "\nAnswer  : " + phrase['idiomatic_translation_to_target_language']
@@ -158,7 +213,7 @@ def ask_for_user_quality_estimate(phrase):
 
     # Open the file for reading after figuring out the relevant id number aka filename
     name_of_sound_to_play = str(phrase['phrase_uuid'])
-    full_path_to_sound_to_play = os.getcwd() + os.path.sep + 'assets' + os.path.sep + name_of_sound_to_play
+    full_path_to_sound_to_play = os.path.join(get_path_to_assets_dir(), name_of_sound_to_play)
 
     pygame.mixer.init()
     pygame.mixer.music.load(full_path_to_sound_to_play)
@@ -194,28 +249,38 @@ def figure_out_when_to_study_next(users_quality_estimate):
         study_due_date = -1  
     return(study_due_date)
     
+# ###################################################################################################
+# ###################################################################################################
+#
+# def convert_csv_to_sqlite():
+#     ## In this function, we take our phrase csv and make a sqlite db out of it
+#     ## We'll use this db to store our study state. This function will only be run the first time afterburner loads.
+#     ## Before we load it, we'll have to unpack our .zip archive into an assets dir, which is itself in the cart library (for now at least)
+#
+#     path_to_cart_file = get_path_to_cartridge_file()
+#     path_to_cart_library = unzip_cartridge_file(path_to_cart_file)
+#
+#     path_to_assets_dir = get_path_to_assets_dir()
+#     path_to_phrases_csv = os.path.join(path_to_assets_dir, config['cartridge_name'] + '.csv')
+#     phrases = pd.read_csv(path_to_phrases_csv, encoding = 'utf8') ## Load phrase text from file
+#
+#     path_to_sqlite_file = os.path.join(path_to_assets_dir, config['cartridge_name'] + '.sqlite')
+#     conn = sqlite3.connect(path_to_sqlite_file)
+#
+#     path_to_sqlite_db = config['cartridge_name']
+#     phrases.to_sql(path_to_sqlite_db, conn, if_exists="fail") ## We don't want to overwrite the user's progress
+#     conn.commit()
+#     conn.close()
+#     return("Successfully created a sqlite DB")
+    
 ###################################################################################################
 ###################################################################################################
 
-def convert_csv_to_sqlite():
-    ## In this function, we take our phrase csv and make a sqlite db out of it
-    ## We'll use this db to store our study state
+def get_path_to_sqlite_db():
+    ## In this function, we figure out the name of our sqlite table and return it
     
-    conn = sqlite3.connect(config['path_to_sqlite_file'])
-    phrases.to_sql(name_of_sqlite_table, conn, if_exists="fail") ## We don't want to overwrite the user's progress
-    conn.commit()
-    conn.close()
-    return("Successfully created a sqlite DB")
-    
-###################################################################################################
-###################################################################################################
-
-def get_name_of_sqlite_table():
-    ## In this function, we figure out the name of our sqlite table
-    
-    name_of_sqlite_table = 'afterburner_' + config['name_of_known_language'] + '_to_' + config['name_of_target_language']
-    name_of_sqlite_table = name_of_sqlite_table.lower()
-    return(name_of_sqlite_table)
+    path_to_sqlite_db = os.path.join(config['absolute_path_to_cartridge_library'], config['cartridge_name'], config['cartridge_name'] + '.sqlite')
+    return(path_to_sqlite_db)
 
 ###################################################################################################
 ###################################################################################################
@@ -223,14 +288,14 @@ def get_name_of_sqlite_table():
 def get_phrases_to_study(name_of_sqlite_table, current_active_lesson):
     ## In this function, we reorder our phrase db and get N phrases which are due for study
     
-    conn = sqlite3.connect(config['path_to_sqlite_file'])
+    conn = sqlite3.connect(path_to_sqlite_db)
     conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
     c = conn.cursor()
     query_template = """
     select 
         *
     from
-        {{name_of_table}}
+        {{{name_of_sqlite_table}}}
     where
         lesson = {{current_active_lesson}}
     order by
@@ -238,7 +303,7 @@ def get_phrases_to_study(name_of_sqlite_table, current_active_lesson):
     limit 1
     """
     
-    params_to_sub = {'name_of_table' : name_of_sqlite_table
+    params_to_sub = {'name_of_sqlite_table' : name_of_sqlite_table
                    , 'current_active_lesson' : current_active_lesson}
     query = pystache.render(query_template, params_to_sub)
 
@@ -259,11 +324,11 @@ def get_phrases_to_study(name_of_sqlite_table, current_active_lesson):
 def update_db(phrase, study_due_date):
     ## In this function, we tell our sqlite db how well we're doing on this phrase
     
-    conn = sqlite3.connect(config['path_to_sqlite_file'])
+    conn = sqlite3.connect(path_to_sqlite_db)
     c = conn.cursor()
     
     update_query_template = """
-    update {{name_of_sqlite_table}} 
+    update {{{name_of_sqlite_table}}} 
     set timestamp_when_phrase_is_due_for_study = '{{time}}'
     where phrase_uuid = {{relevant_uuid}}
     ;
@@ -286,7 +351,7 @@ def get_current_active_lesson(name_of_sqlite_table):
     ## In this function, we ask the db to tell us which lesson the user is currently working on.
     ## To get this, we just take the highest-numbered lesson that has meaningful due-for-study timestamps
     
-    conn = sqlite3.connect(config['path_to_sqlite_file'])
+    conn = sqlite3.connect(path_to_sqlite_db)
     conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
     c = conn.cursor()
     
@@ -319,7 +384,7 @@ def detect_if_new_lesson_needed(name_of_sqlite_table, current_active_lesson):
     ## In this function, we ask the db if the user has completed all the phrases in the current lesson.
     ## If that's the case, we should move on to the next lesson.
     
-    conn = sqlite3.connect(config['path_to_sqlite_file'])
+    conn = sqlite3.connect(path_to_sqlite_db)
     conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
     c = conn.cursor()
     
@@ -366,7 +431,7 @@ def study_remedial_phrases(name_of_sqlite_table, current_active_lesson):
     ## and ends up forgotten. Note that here we return phrase rows from arbitrary lessons that
     ## have already been studied.
     
-    conn = sqlite3.connect(config['path_to_sqlite_file'])
+    conn = sqlite3.connect(path_to_sqlite_db)
     conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
     c = conn.cursor()
     
@@ -417,10 +482,12 @@ def learn_phrase(phrase):
 ## Call functions in a sensible order
 
 if __name__ == "__main__":
+    cart_config = load_cartridge_specific_config() ## Figure out the names of our languages etc.
     print_welcome_screen()
-    name_of_sqlite_table = get_name_of_sqlite_table()
-    if not os.path.isfile(config['path_to_sqlite_file']): ## If we're running for the first time, we can create a db to hold our study state. Otherwise, we can skip this step
-        convert_csv_to_sqlite()
+    path_to_sqlite_db = get_path_to_sqlite_db()
+    name_of_sqlite_table = config['cartridge_name']
+    if not os.path.isdir(get_path_to_assets_dir()): ## If we're running for the first time, we can unpack our cartridge zip. Otherwise, we can skip this step
+        unzip_cartridge_file(get_path_to_cartridge_file())
     current_active_lesson = get_current_active_lesson(name_of_sqlite_table)
     
     ## Get a phrase to study
@@ -435,6 +502,8 @@ if __name__ == "__main__":
 # * Add 10 second progress bar while the user is trying to say the phrase
 # * Use a better GUI system that doesn't flicker every time you click something
 # * Figure out how to get audio from movies/tv/radio and two-language-track closed-captions, in order to prevent us from having to pay for native speakers
-# * Get the phraselist from http://frequencylists.blogspot.com/2016/08/5000-italian-sentences-sorted-from.html
+# DONE * Get the phraselist from http://frequencylists.blogspot.com/2016/08/5000-italian-sentences-sorted-from.html
 # * Implement a naive machine translation?
 # * Build facilities for loading fully-modularized .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
+# * Print study stats, such as total hours studied, what lesson you're on, how many phrases fall into each bucket, etc.
+# * Package afterburner as a standalone program
