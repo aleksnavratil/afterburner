@@ -44,7 +44,7 @@ The whole point of Afterburner is to spend all your study time training **Skill 
 
 **Skill #2** is trained by [Yabla](https://www.yabla.com/) which you should use alongside Afterburner or Language101.com.
 
-A consequence of this relentless focus on **Skill #1** is that Afterburner isn't much to look at, particularly if you're used to the shock-and-awe graphics common to many of the heavily-advertised language systems. But bear with it, because it *teaches you a lot* in a short time.
+A consequence of this relentless focus on **Skill #1** is that Afterburner isn't much to look at, particularly if you're used to the shock-and-awe graphics common to many of the heavily-advertised language systems. But bear with it, because it teaches you a lot in a short time.
 
 
 ## FAQ

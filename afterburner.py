@@ -18,38 +18,91 @@ import pystache ## For sane templating
 from easygui import * ## For user interfaces
 import zipfile ## For unzipping our cartridge files
 
-
 ###################################################################################################
 ###################################################################################################
 
-## Load config information from file. This is where we learn where the cartridge is stored.
-## We'll later load cart-specific config info from another similar file.
-with open("config.yaml", 'r') as config_file:
-    config = yaml.load(config_file)
+#-----------------------------------------------------------------------
+# Define a class named Settings as a subclass of EgStore. This will 
+# handle our persistence of the user's preferred cartridge file
+#-----------------------------------------------------------------------
+class Settings(EgStore):
+
+    def __init__(self, filename):  # filename is required
+        #-------------------------------------------------
+        # Specify default/initial values for variables that
+        # this particular application wants to remember.
+        #-------------------------------------------------
+        self.absolute_path_to_last_used_cart_file = ""
+
+        #-------------------------------------------------
+        # For subclasses of EgStore, these must be
+        # the last two statements in  __init__
+        #-------------------------------------------------
+        self.filename = filename  # this is required
+        self.restore()            # restore values from the storage file if possible
 
 ###################################################################################################
 ###################################################################################################
 
 def print_welcome_screen():
-    ## In this function, we display a welcome screen to the user
+    ## In this function, we display a welcome screen to the user and ask if he'd like to continue
+    ## studying the same cartridge as previously, or study a new one
     
+    #-----------------------------------------------------------------------
+    # create "settings", a persistent Settings object, which inherits from
+    # the class defined above.
+    # Note that the "filename" argument is required.
+    # The directory for the persistent file must already exist.
+    #-----------------------------------------------------------------------
+    settingsFilename = os.path.join('/Users/aleks', '.afterburner_persistent_settings.txt')
+    settings = Settings(settingsFilename)
+    
+    ## Figure out a polite welcome message, and print it to the screen.
     welcome_message = """Welcome to Afterburner, one of the faster ways to learn a spoken human language."""
-    title="Afterburner"
+    keep_studying_same_language_button_text = "Keep studying the same cartridge as last time"
+    pick_a_new_cartridge_button_text = "Study a new cartridge file"
     
-    ## Print a message box on the screen
-    msgbox(welcome_message, title = "Afterburner", ok_button = "Let's go!")
-    return(welcome_message)
+    choices = [keep_studying_same_language_button_text, pick_a_new_cartridge_button_text]
+    users_desire = indexbox(msg = welcome_message, title = "Afterburner", choices = choices)
+    
+    ## Depending on what the user wants to do, we can take one of two actions
+    if(users_desire == 0):
+        if(settings.absolute_path_to_last_used_cart_file != ''): ## Make sure the settings file exists
+            return(settings.absolute_path_to_last_used_cart_file) ## If it does exist, just return the path from it
+        else:
+           absolute_path_to_cart = fileopenbox(filetypes = ['*.cart']) ## If it doesn't exist, just ask the user for the path again. This is the same as if users_desire = 1
+           settings.absolute_path_to_last_used_cart_file = absolute_path_to_cart
+           settings.store()    # Persist the settings to disk
+           return absolute_path_to_cart 
+        
+    elif(users_desire == 1):
+        absolute_path_to_cart = fileopenbox(filetypes = ['*.cart'])
+        settings.absolute_path_to_last_used_cart_file = absolute_path_to_cart
+        settings.store()    # Persist the settings to disk
+        return absolute_path_to_cart
+    else:
+        return("Something went wrong in the print_welcome_screen() function")
 
 ###################################################################################################
 ###################################################################################################
 
-def get_path_to_cartridge_file():
-    ## In this function, we construct and return the absolute path to the cartridge file
+def get_path_to_users_cart():
+    ## In this function, we open a file picker GUI and let the user select the path to the 
+    ## relevant cartridge file
     
-    path_to_cartridge_library = config['absolute_path_to_cartridge_library']
-    name_of_cartridge_file = config['cartridge_name'] + '.cart'
-    absolute_path_to_cartridge_file = os.path.join(path_to_cartridge_library, name_of_cartridge_file)
-    return(absolute_path_to_cartridge_file)
+    absolute_path_to_cart = fileopenbox(filetypes = ['*.cart'])
+    return absolute_path_to_cart
+
+###################################################################################################
+###################################################################################################
+
+# def get_path_to_cartridge_file():
+#     ## In this function, we construct and return the absolute path to the cartridge file
+#
+#     path_to_cartridge_library = config['absolute_path_to_cartridge_library']
+#     name_of_cartridge_file = config['cartridge_name'] + '.cart'
+#     absolute_path_to_cartridge_file = os.path.join(path_to_cartridge_library, name_of_cartridge_file)
+#     return(absolute_path_to_cartridge_file)
     
 ###################################################################################################
 ###################################################################################################
@@ -82,15 +135,13 @@ def get_path_to_assets_dir():
     ## This is just a convenience function which is substantially similar to get_path_to_cartridge_file().
     ## It returns the same thing but without a .zip extension
     
-    path_to_cartridge_library = config['absolute_path_to_cartridge_library']
-    name_of_assets_dir = config['cartridge_name']
-    absolute_path_to_assets_dir= os.path.join(path_to_cartridge_library, name_of_assets_dir)
+    absolute_path_to_assets_dir = path_to_cartridge_file.replace('.cart', '')
     return(absolute_path_to_assets_dir)
 
 ###################################################################################################
 ###################################################################################################
 
-def load_cartridge_specific_config():
+def load_cartridge_specific_config(path_to_cartridge_file):
     ## Having unzipped our cart, we should have an /assets directory. We can get the
     ## cartridge specific config file out of here and load it.
 
@@ -245,7 +296,8 @@ def figure_out_when_to_study_next(users_quality_estimate):
 def get_path_to_sqlite_db():
     ## In this function, we figure out the name of our sqlite table and return it
     
-    path_to_sqlite_db = os.path.join(config['absolute_path_to_cartridge_library'], config['cartridge_name'], config['cartridge_name'] + '.sqlite')
+    # path_to_sqlite_db = os.path.join(config['absolute_path_to_cartridge_library'], config['cartridge_name'], config['cartridge_name'] + '.sqlite')
+    path_to_sqlite_db = os.path.join(get_path_to_assets_dir(), cart_config['cartridge_name'] + '.sqlite')
     return(path_to_sqlite_db)
 
 ###################################################################################################
@@ -448,12 +500,12 @@ def learn_phrase(phrase):
 ## Call functions in a sensible order
 
 if __name__ == "__main__":
+    path_to_cartridge_file = print_welcome_screen()
     if not os.path.isdir(get_path_to_assets_dir()): ## If we're running for the first time, we can unpack our cartridge zip. Otherwise, we can skip this step
-        unzip_cartridge_file(get_path_to_cartridge_file())
-    cart_config = load_cartridge_specific_config() ## Figure out the names of our languages etc.
-    print_welcome_screen()
+        unzip_cartridge_file(path_to_cartridge_file)
+    cart_config = load_cartridge_specific_config(path_to_cartridge_file) ## Figure out the names of our languages etc.
     path_to_sqlite_db = get_path_to_sqlite_db()
-    name_of_sqlite_table = config['cartridge_name']
+    name_of_sqlite_table = cart_config['cartridge_name']
     current_active_lesson = get_current_active_lesson(name_of_sqlite_table)
     
     ## Get a phrase to study
@@ -473,3 +525,7 @@ if __name__ == "__main__":
 # DONE * Build facilities for loading fully-modularized .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
 # * Print study stats, such as total hours studied, what lesson you're on, how many phrases fall into each bucket, etc.
 # * Package afterburner as a standalone program
+# Write gui for selecting cart files
+# Persist the user's most recent choice of cart file
+
+## TODO WEDNESDAY: REMOVE THE DEPENDENCIES ON the config file.
