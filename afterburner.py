@@ -54,7 +54,7 @@ def print_welcome_screen():
     # Note that the "filename" argument is required.
     # The directory for the persistent file must already exist.
     #-----------------------------------------------------------------------
-    settingsFilename = os.path.join(os.getcwd(), '.afterburner_persistent_settings.txt')
+    settingsFilename = os.path.join(os.getcwd(), '.afterburner_persistent_settings.txt') ## Here we try to use the parent directory of our executable's pseudo dir
     settings = Settings(settingsFilename)
     
     ## Figure out a polite welcome message, and print it to the screen.
