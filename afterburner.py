@@ -23,8 +23,7 @@ import zipfile ## For unzipping our cartridge files
 ###################################################################################################
 
 ## Load config information from file. This is where we learn where the cartridge is stored.
-## We'll later load cart-specific config info from another
-## similar file.
+## We'll later load cart-specific config info from another similar file.
 with open("config.yaml", 'r') as config_file:
     config = yaml.load(config_file)
 
