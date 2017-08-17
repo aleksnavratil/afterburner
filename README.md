@@ -164,7 +164,7 @@ A. In the 90's, when you bought a Nintendo, you had to also buy some games, whic
 
 The contents of each cartridge file is just a bunch of .mp3's with numerical filenames such as 3465 or 295, with no file extensions, and a .sqlite database containing some text in both the known and target languages. The sqlite db just tells Afterburner which text goes with which audio files. 
 
-You can find the canonical list of available cartridges [here](TODO: FIGURE OUT WHERE TO HOST CARTRIDGE FILES)
+You can find the canonical list of available cartridges [here](https://www.dropbox.com/s/5wx2feooxa0spf0/afterburner_english_to_italian_1.cart?dl=0)
 
 
 
@@ -175,9 +175,7 @@ A. Will build soon, hang tight.
 
 ## Explanation of the files in this repo
 
-* `afterburner.py` is the main executable file. It's structured in three chunks. There's a headers section, wherein we import various libraries and load some config info from file. Then there are a bunch of function definitions, and finally a main method.
-
-* `config.yaml` is a user-adjustable configuration file. Basically this is where you tell Afterburner where your cartridge file is. This can be anywhere, but it's common to make a subdirectory underneath the `whatever_your_path_is/afterburner` repo called something like `cartridge_library`. 
+* `afterburner.py` is the main executable file. It's structured in three chunks. There's a headers section, wherein we import various libraries. Then there are a bunch of class and function definitions. And lastly, there's a main method.
 
 ## How to run this software
 
