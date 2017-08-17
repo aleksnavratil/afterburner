@@ -9,7 +9,7 @@
 ###################################################################################################
 
 import yaml ## For importing our config file
-import pygame ## For playing our audio clips
+from pygame import mixer ## For playing our audio clips
 import os ## For constructing file path names
 import sys ## For halting the program if the user runs out of lessons
 import datetime ## To decide when a phrase is due for study
@@ -48,7 +48,7 @@ def get_path_to_cartridge_file():
     ## In this function, we construct and return the absolute path to the cartridge file
     
     path_to_cartridge_library = config['absolute_path_to_cartridge_library']
-    name_of_cartridge_file = config['cartridge_name'] + '.zip'
+    name_of_cartridge_file = config['cartridge_name'] + '.cart'
     absolute_path_to_cartridge_file = os.path.join(path_to_cartridge_library, name_of_cartridge_file)
     return(absolute_path_to_cartridge_file)
     
@@ -59,7 +59,7 @@ def unzip_cartridge_file(path_to_cartridge_file):
     ## In this function, we consume as input the path to the cartridge file from the config file.
     ## We unzip this cartridge file into an assets directory which will eventually contain
     ## .mp3's and a .csv and a .sqlite db
-    loading_message = """"Since we're running this cartridge for the first time, afterburner is now unpacking the cartridge. This will take a couple minutes."""
+    loading_message = """Since we're running this cartridge for the first time, afterburner is now unpacking the cartridge. This will take a couple minutes."""
     title="Afterburner cartridge loading"
     
     ## Print a message box on the screen explaining why this takes so long
@@ -169,12 +169,12 @@ def show_answer(phrase):
     name_of_sound_to_play = str(phrase['phrase_uuid'])
     full_path_to_sound_to_play = os.path.join(get_path_to_assets_dir(), name_of_sound_to_play)
     
-    pygame.mixer.init()
-    pygame.mixer.music.load(full_path_to_sound_to_play)
-    pygame.mixer.music.play()
+    mixer.init()
+    mixer.music.load(full_path_to_sound_to_play)
+    mixer.music.play()
     ## Now that we've started playing the sound, let's display our UI              
     render_ui()
-    while pygame.mixer.music.get_busy() == True:
+    while mixer.music.get_busy() == True:
         continue
     
     return(name_of_sound_to_play)          
@@ -206,12 +206,12 @@ def ask_for_user_quality_estimate(phrase):
     name_of_sound_to_play = str(phrase['phrase_uuid'])
     full_path_to_sound_to_play = os.path.join(get_path_to_assets_dir(), name_of_sound_to_play)
 
-    pygame.mixer.init()
-    pygame.mixer.music.load(full_path_to_sound_to_play)
-    pygame.mixer.music.play()
+    mixer.init()
+    mixer.music.load(full_path_to_sound_to_play)
+    mixer.music.play()
     ## Now that we've started playing the sound, let's display our UI  
     users_quality_estimate = render_ui()
-    while pygame.mixer.music.get_busy() == True:
+    while mixer.music.get_busy() == True:
         continue
         
     return(users_quality_estimate)
