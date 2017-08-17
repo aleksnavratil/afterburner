@@ -63,7 +63,7 @@ A. They're here to take your money/get their KPI's up, not teach you a language.
 
 
 
-__Q. Ok, this looks great. Does it work for my language of interest X, which is written left to write/top to bottom/with super-exotic glyphs or in a very unusual character set?__
+__Q. Ok, this looks great. Does it work for my language of interest X, which is written left-to-right/top-to-bottom/with super-exotic glyphs or in a very unusual character set?__
 
 A. Ummm. I am probably not smart enough to reason about your vertically-written language. That said, Afterburner is Unicode all the way down, so in general it might be expected to approximately work. However, I make no promises about whether the UI can render your character set in an intelligible vertical order.
 
