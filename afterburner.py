@@ -96,17 +96,6 @@ def get_path_to_users_cart():
 ###################################################################################################
 ###################################################################################################
 
-# def get_path_to_cartridge_file():
-#     ## In this function, we construct and return the absolute path to the cartridge file
-#
-#     path_to_cartridge_library = config['absolute_path_to_cartridge_library']
-#     name_of_cartridge_file = config['cartridge_name'] + '.cart'
-#     absolute_path_to_cartridge_file = os.path.join(path_to_cartridge_library, name_of_cartridge_file)
-#     return(absolute_path_to_cartridge_file)
-    
-###################################################################################################
-###################################################################################################
-
 def unzip_cartridge_file(path_to_cartridge_file):
     ## In this function, we consume as input the path to the cartridge file from the config file.
     ## We unzip this cartridge file into an assets directory which will eventually contain
@@ -525,7 +514,6 @@ if __name__ == "__main__":
 # DONE * Build facilities for loading fully-modularized .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
 # * Print study stats, such as total hours studied, what lesson you're on, how many phrases fall into each bucket, etc.
 # * Package afterburner as a standalone program
-# Write gui for selecting cart files
-# Persist the user's most recent choice of cart file
+# DONE * Write gui for selecting cart files
+# DONE * Persist the user's most recent choice of cart file
 
-## TODO WEDNESDAY: REMOVE THE DEPENDENCIES ON the config file.

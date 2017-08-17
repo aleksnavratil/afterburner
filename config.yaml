@@ -1,9 +1,0 @@
-## Config file for afterburner.py
-
-## It's common to make a subdirectory within your whatever/afterburner directory," like this:
-## whatever/afterburner/cartridge_library
-## and then put your cartridge zips in there. But really it doesn't matter where you keep your cartridge files, 
-## they can be anywhere.
-absolute_path_to_cartridge_library : /Users/aleks/repos/afterburner/cartridge_library
-cartridge_name : afterburner_english_to_italian_1
-
