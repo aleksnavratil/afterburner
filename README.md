@@ -8,18 +8,23 @@ _One of the faster ways to learn a spoken human language_
   - [Pedagogical philosophy](#pedagogical-philosophy)
       - [Background](#background)
   - [FAQ](#faq)
-  - [Explanation of the files in this repo](#explanation-of-the-files-in-this-repo)
+  - [How to install this software](#how-to-install-this-software)
   - [How to run this software](#how-to-run-this-software)
+      - [The easy way: Prebuilt binaries](#the-easy-way-prebuilt-binaries)
+      - [The harder way: Running from source](#the-harder-way-running-from-source)
+  - [Explanation of the files in this repo](#explanation-of-the-files-in-this-repo)
+  - [Making your own cartridges](#making-your-own-cartridges)
+
 
 ## What's the point of this program
 
-The point of this program is to teach you to be plausibly conversant in a spoken human language, such as Italian or Polish. This program is substantially an open-source clone/blatant ripoff of [language101.com](https://language101.com/)'s excellent software. It is designed such that it can work with many languages, but the only one that's built so far is Italian.
+The point of this program is to teach you to be plausibly conversant in a spoken human language, such as Italian or Polish. This program is substantially an open-source extension/blatant ripoff of [language101.com](https://language101.com/)'s excellent software. It is designed such that it can work with many languages, but the only one that's built so far is Italian for English speakers.
 
 ## Pedagogical philosophy
-Afterburner is Opinionated Software (tm), designed around the idea that there is a right way and a wrong way to learn a language. 
+Afterburner is designed around the idea that there is a right way and a wrong way to learn a language. 
 
 #### Background
-Every language learning system works, but some work faster than others. Some systems work so slowly that they're nearly indistinguishable from no instruction at all. Afterburner is one of the faster systems --- but why does it work faster than others?
+Every language learning system works, but some work faster than others. Some systems work so slowly that they're nearly indistinguishable from no instruction at all. Afterburner is one of the faster systems --- but why is it fast?
 
 Many skills can be trained during language learning. Here are some examples of trainable skills, using Italian as the target language and English as the known language.
  
@@ -30,7 +35,7 @@ Many skills can be trained during language learning. Here are some examples of t
 * Filling in the missing words in an Italian sentence, like in the CLOZE exam or MadLibs
 * ... etc ... 
 
-There are a large number of these skills; if you spend any time with the common language learning systems such as Rosetta Stone or DuoLingo or whatever, you'll find endless variations on them --- probably ten or twenty or more. However, it turns out that in practice, almost none of these skills matter. In fact, for becoming passably conversational, only two skills matter:
+There are a large number of these skills; if you spend any time with the common language learning systems such as Rosetta Stone or Duolingo or whatever, you'll find endless variations on them --- probably ten or twenty or more. However, it turns out that in practice, almost none of these skills matter. In fact, for becoming passably conversational, only two skills matter:
 
 **Important Skill #1:** Reading written English, and translating to *spoken out loud Italian*.
 
@@ -38,13 +43,13 @@ and
 
 **Important Skill #2:** Listening to and comprehending spoken Italian
 
-It turns out that if you master these two skills, you *get all the other skills for free*. Curiously, many heavily-advertised language learning systems spend zero to five percent of their time training these two skills. And it turns out that your learning rate is almost exactly predicted by the fraction of your time spent training these skills. So as a rule of thumb, most popular language learning systems are wasting ~95% of your time. That's why Afterburner works so much faster than other systems.
+It turns out that if you master these two skills, you *get all the other skills for free*. Curiously, many heavily-advertised language learning systems spend zero to five percent of their time training these two skills. And it turns out that your learning rate is almost exactly predicted by the amount of time spent training these skills. So as a rule of thumb, most popular language learning systems are wasting ~95% of your time. That's why Afterburner works so much faster than other systems.
 
-The whole point of Afterburner is to spend all your study time training **Skill #1**. Note that you *absolutely must say the phrase out loud.* If you just think it in your head, or say it in English, or do anything other than say it out loud in your target language, the magic breaks and you'll revert back down to low-speed language acquisition just like in any other system. Also, you should try to spend a startlingly small amount of time on each phrase. It's critical to get your study rate down to < 10 seconds per phrase. 7 seconds per phrase is ideal. It's tempting to spend more time reviewing each phrase --- don't do this, you have to resist that temptation. Trust that Afterburner's spaced repetition algorithm knows how to teach you things optimally, and give yourself honest grades after trying each phrase as quickly as possible.
+The whole point of Afterburner is to spend all your study time training **Skill #1**. Note that you *absolutely must say the phrase out loud.* If you just think it in your head, or say it in English, or do anything other than say it out loud in your target language, the magic breaks and you'll revert back down to low-speed language acquisition just like in any other system. Also, you should try to spend a startlingly small amount of time on each phrase. It's critical to get your study rate down to < 10 seconds per phrase. 7 seconds per phrase is ideal. It's tempting to spend more time reviewing each phrase --- don't fall into this trap. Trust that Afterburner's spaced repetition algorithm knows how to teach you things optimally, and give yourself honest grades after trying each phrase as quickly as possible.
 
 **Skill #2** is trained by [Yabla](https://www.yabla.com/) which you should use alongside Afterburner or Language101.com.
 
-A consequence of this relentless focus on **Skill #1** is that Afterburner isn't much to look at, particularly if you're used to the shock-and-awe graphics common to many of the heavily-advertised language systems. But bear with it, because it teaches you a lot in a short time.
+A consequence of this relentless focus on **Skill #1** is that Afterburner isn't much to look at, particularly if you're used to the shock-and-awe graphics common to many of the heavily-advertised language systems.
 
 
 ## FAQ
@@ -58,14 +63,14 @@ A. True, nothing works for everybody. However, brief and highly non-scientific r
 
 __Q. Ok, I believe your theory about Important Skills #1 and #2, but why are rival language systems designed around such glaring ignorance/misunderstandings of human language cognition?__
 
-A. They're here to take your money/get their KPI's up, not teach you a language. How do you think they can afford all those shiny ads in Conde Nast magazines? Their business model doesn't depend on you actually learning anything.
+A. They're here to take your money, not teach you a language. Their business model doesn't depend on you actually learning anything.
 
 
 
 
-__Q. Ok, this looks great. Does it work for my language of interest X, which is written left-to-right/top-to-bottom/with super-exotic glyphs or in a very unusual character set?__
+__Q. Ok, this looks great. Will it work if I make a cartridge for my language of interest X, which is written left-to-right/top-to-bottom/with super-exotic glyphs or in a very unusual character set?__
 
-A. Ummm. I am probably not smart enough to reason about your vertically-written language. That said, Afterburner is Unicode all the way down, so in general it might be expected to approximately work. However, I make no promises about whether the UI can render your character set in an intelligible vertical order.
+A. I am probably not smart enough to reason about your vertically-written language. That said, Afterburner is Unicode all the way down, so in general it might be expected to approximately work. However, I make no promises about whether the UI can render your character set in an intelligible vertical order.
 
 
 
@@ -86,7 +91,7 @@ A. Yes, you're right. At some point I might learn how to write a better one. Bea
 
 __Q. Yes but the flicker is annoying.__
 
-A. You're right, that's why I might built a better UI.
+A. Yes :( 
 
 
 
@@ -128,14 +133,14 @@ A. I mean, it's your money and your time. But I solemnly promise you will *never
 
 __Q. How do you know Afterburner is better than alternative system X, have you tried it?__
 
-A. In general yes, I have tried most of the widely-available language systems out there, including academic classes, Rosetta Stone, DuoLingo, Anki, Fluenz, Language101, etc. Most of them work, but some work faster than others. In general you should find the combination of tools that maximizes your learning rate, and use that toolset to the exclusion of all others. 
+A. In general yes, I have tried most of the widely-available language systems out there, including academic classes, Rosetta Stone, DuoLingo, Anki, Language101, etc. Most of them work, but some work faster than others. In general you should find the combination of tools that maximizes your learning rate, and use that toolset to the exclusion of all others. 
 
 
 
 
 __Q. Will Afterburner teach me to write eloquently in my target language?__
 
-A. No, it's for becoming minimally conversational. The idea is to get you to the point where immersion is a time-effective pedagogy. 
+A. No, it's for becoming minimally conversational. The idea is to get you to the point where immersion becomes a time-effective pedagogy. 
 
 
 
@@ -148,7 +153,7 @@ A. Yes, this is a known thing. No computerized method can help you now. You need
 
 __Q. Are there better methods than Afterburner for language learning?__
 
-A. Yes, I strongly suspect that Afterburner + Yabla + [Total Physical Response](https://en.wikipedia.org/wiki/Total_physical_response) with a native speaker tutor is the *best* available pedagogy, and you should do this if you have unlimited money and time. In fact TPR *alone* might work better than anything else. However, TPR is expensive because you need a human tutor. So in terms of learning per dollar, Afterburner is a better deal. 
+A. Yes, I strongly suspect that Afterburner + Yabla + [Total Physical Response](https://en.wikipedia.org/wiki/Total_physical_response) with a native speaker tutor is the *best* available pedagogy, and you should do this if you have unlimited money and time. In fact TPR *alone* might work better than anything else. However, TPR is expensive because you need a human tutor.
 
 
 
@@ -164,7 +169,7 @@ A. In the 90's, when you bought a Nintendo, you had to also buy some games, whic
 
 The contents of each cartridge file is just a bunch of .mp3's with numerical filenames such as 3465 or 295, with no file extensions, and a .sqlite database containing some text in both the known and target languages. The sqlite db just tells Afterburner which text goes with which audio files. 
 
-You can find the canonical list of available cartridges [here](https://www.dropbox.com/s/5wx2feooxa0spf0/afterburner_english_to_italian_1.cart?dl=0)
+You can find the canonical list of available cartridges [here](https://www.dropbox.com/sh/6tiluiygdihrbsd/AADclk3SfdoJz2FmumKZB4dca?dl=0)
 
 
 
@@ -173,14 +178,52 @@ __Q. Why are there no study stats, showing e.g. my total study duration?__
 
 A. Will build soon, hang tight. 
 
+
+## How to install this software
+
+Afterburner requires no installation. Instead, you can just download the prebuilt binary (or build your own binary from source, if you run an exotic OS) for your operating system and run it immediately by double clicking it. You might, however, want to move the Afterburner binary to some directory other than your `Downloads` folder.
+
+
+## How to run this software
+
+There are 2 methods for running this software --- first, the easy way, by using the appropriate prebuilt binary for your OS, and secondly, the harder way, by running the program from source. The latter method is likely only useful if you'd like to modify the code for some reason.
+
+In either case, you'll have to begin by downloading the cartridge file for the language pair that you're interested in. The canonical source of cartridge files is [here](https://www.dropbox.com/sh/6tiluiygdihrbsd/AADclk3SfdoJz2FmumKZB4dca?dl=0). If there's no cart for your language, consider creating one. If you do create one, we'll be happy to link to it. Anyway, after downloading one or more cart files, it's time to get Afterburner itself. 
+
+#### The easy way: Prebuilt binaries
+
+Go to [the releases page](https://github.com/aleksnavratil/afterburner/releases) for Afterburner and download the binary appropriate for your OS. For example, if you use a Mac, download e.g. `afterburner_osx_prebuilt_binary`. Move this to some sensible location on your machine, then double click it to run. You'll need to put it in a location where you have write permissions.
+
+#### The harder way: Running from source
+
+If you want to run the code from source for some reason, here's how to do it:
+
+First, clone the repo to some location on your machine:
+
+```
+cd /some/location/on/your/machine
+git clone git@github.com:aleksnavratil/afterburner.git
+```
+
+Then, change directories to the repo that you just cloned:
+
+```
+cd /some/location/on/your/machine/afterburner
+```
+
+Then run the main file. This assumes you have Python and various necessary packages installed.
+
+```
+python afterburner.py
+```
+
+On some operating system, this often causes Afterburner to run in the rearground, hidden behind your other windows. So you might need to dig a bit to find it. 
+
 ## Explanation of the files in this repo
 
 * `afterburner.py` is the main executable file. It's structured in three chunks. There's a headers section, wherein we import various libraries. Then there are a bunch of class and function definitions. And lastly, there's a main method.
 
-## How to run this software
 
-TODO: FILL THIS IN
+## Making your own cartridges
 
-Note that we assume you have a cartridge file already downloaded and stored somewhere on your local machine. 
-
-You might also be interested in the "Afterburner Cartridge Factory" helper program for constructing afterburner cartridges, which is [here](https://github.com/aleksnavratil/afterburner-cartridge-factory). Note that currently "factory" is a bit of a misnomer, since cartridge construction is still pretty manual.
+You might be interested in the "Afterburner Cartridge Factory" helper program for constructing afterburner cartridges, which is [here](https://github.com/aleksnavratil/afterburner-cartridge-factory). Note that currently "factory" is a bit of a misnomer, since cartridge construction is still pretty manual.

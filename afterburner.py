@@ -513,7 +513,7 @@ if __name__ == "__main__":
 # * Implement a naive machine translation?
 # DONE * Build facilities for loading fully-modularized .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
 # * Print study stats, such as total hours studied, what lesson you're on, how many phrases fall into each bucket, etc.
-# * Package afterburner as a standalone program
+# DONE * Package afterburner as a standalone program
 # DONE * Write gui for selecting cart files
 # DONE * Persist the user's most recent choice of cart file
 
