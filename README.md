@@ -219,6 +219,15 @@ python afterburner.py
 
 On some operating system, this often causes Afterburner to run in the rearground, hidden behind your other windows. So you might need to dig a bit to find it. 
 
+## How to build from source
+
+If you're on an exotic OS, it's in principle pretty easy to build a binary from source. Just clone the repo and change to the directory containing `afterburner.py`, then run the following:
+
+```
+pyinstaller -F afterburner.py
+```
+This assumes you have correctly installed `pyinstaller` for your OS, probably by following the [PyInstaller docs](https://pyinstaller.readthedocs.io/en/stable/usage.html). It will emit an Afterburner binary into a new subdirectory called `dist`.
+
 ## Explanation of the files in this repo
 
 * `afterburner.py` is the main executable file. It's structured in three chunks. There's a headers section, wherein we import various libraries. Then there are a bunch of class and function definitions. And lastly, there's a main method.
