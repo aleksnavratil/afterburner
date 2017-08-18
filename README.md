@@ -12,6 +12,7 @@ _One of the faster ways to learn a spoken human language_
   - [How to run this software](#how-to-run-this-software)
       - [The easy way: Prebuilt binaries](#the-easy-way-prebuilt-binaries)
       - [The harder way: Running from source](#the-harder-way-running-from-source)
+  - [How to build from source](#how-to-build-from-source)
   - [Explanation of the files in this repo](#explanation-of-the-files-in-this-repo)
   - [Making your own cartridges](#making-your-own-cartridges)
 
