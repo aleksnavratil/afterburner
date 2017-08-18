@@ -192,7 +192,7 @@ In either case, you'll have to begin by downloading the cartridge file for the l
 
 #### The easy way: Prebuilt binaries
 
-Go to [the releases page](https://github.com/aleksnavratil/afterburner/releases) for Afterburner and download the binary appropriate for your OS. For example, if you use a Mac, download e.g. `afterburner_osx_prebuilt_binary`. Move this to some sensible location on your machine, then double click it to run. You'll need to put it in a location where you have write permissions.
+Go to [the releases page](https://github.com/aleksnavratil/afterburner/releases) for Afterburner and download the binary appropriate for your OS. For example, if you use a Mac, download e.g. `afterburner_osx_prebuilt_binary`. Note that the OSX binary doesn't have a file extension, which usually confuses people. Move this to some sensible location on your machine, then double click it to run. You'll need to put it in a location where you have write permissions.
 
 #### The harder way: Running from source
 
