@@ -7,7 +7,8 @@
 ## It's substantially a ripoff/extension of language-101.com
 ###################################################################################################
 ###################################################################################################
-
+## First, let's handle some boilerplate
+# -*- coding: utf8 -*-
 import yaml ## For importing our config file
 from pygame import mixer ## For playing our audio clips
 import os ## For constructing file path names
@@ -17,6 +18,8 @@ import sqlite3 ## For managing the state of the user's phrases
 import pystache ## For sane templating
 from easygui import * ## For user interfaces
 import zipfile ## For unzipping our cartridge files
+import emoji ## For displaying emojis in the UI
+from Tkinter import Tk
 
 ###################################################################################################
 ###################################################################################################
@@ -47,6 +50,17 @@ class Settings(EgStore):
 def print_welcome_screen():
     ## In this function, we display a welcome screen to the user and ask if he'd like to continue
     ## studying the same cartridge as previously, or study a new one
+
+    ## First, try to make our GUI stop appearing at the bottom of the window stack on OSX. Instead, it should appear in the foreground.
+    t = Tk()
+    # Hope that the destroy is fast enough not to be seen.
+    t.destroy()
+    
+    ## Gaaad what a hack :/
+    script = 'tell application "System Events" to set frontmost of the first process whose unix id is {pid} to true'.format(pid=os.getpid())
+    os.system("/usr/bin/osascript -e '{script}'".format(script=script))
+    
+    ## Now we can actually start doing useful stuff
     
     #-----------------------------------------------------------------------
     # create "settings", a persistent Settings object, which inherits from
@@ -63,6 +77,7 @@ def print_welcome_screen():
     pick_a_new_cartridge_button_text = "Study a new cartridge file"
     
     choices = [keep_studying_same_language_button_text, pick_a_new_cartridge_button_text]
+    
     users_desire = indexbox(msg = welcome_message, title = "Afterburner", choices = choices)
     
     ## Depending on what the user wants to do, we can take one of two actions
@@ -222,7 +237,7 @@ def show_answer(phrase):
 ###################################################################################################
 
 def ask_for_user_quality_estimate(phrase):
-    ## In this function, we take input from the user about how well they said the sentence.
+    ## In this function, we take input from the user about how well he said the sentence.
     ## This is basically only useful if the user is *sufficiently competent to even attempt the phrase*
     ## Here we grossly mix audio-and-ui related code in a single function.
     ## However, there's a good reason for this: It allows us to play the sound at almost
@@ -236,7 +251,13 @@ def ask_for_user_quality_estimate(phrase):
 
         message = string1 + string2 + string3 + string4
         title = "Afterburner"
-        choices = ['Wrong', 'Some Mistakes', 'Shaky', 'Good', 'Perfect']
+        choices = ['\xF0\x9F\x98\x94Wrong\xF0\x9F\x98\x94'
+                 , '\xF0\x9F\x98\xA5Some Mistakes\xF0\x9F\x98\xA5'
+                 , '\xF0\x9F\x98\x96Shaky\xF0\x9F\x98\x96'
+                 , '\xF0\x9F\x98\x83Good\xF0\x9F\x98\x83'
+                 , '\xF0\x9F\x98\x81Perfect\xF0\x9F\x98\x81'
+                   ] ## Obviously you can't have a UI without emojis. Get the codes for these from e.g. https://apps.timwhitlock.info/emoji/tables/unicode
+                 
         users_quality_estimate = indexbox(msg = message, title = "Afterburner", choices = choices)
         return(users_quality_estimate)
 
