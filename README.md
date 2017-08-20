@@ -71,7 +71,7 @@ A. They're here to take your money, not teach you a language. Their business mod
 
 __Q. Ok, this looks great. Will it work if I make a cartridge for my language of interest X, which is written left-to-right/top-to-bottom/with super-exotic glyphs or in a very unusual character set?__
 
-A. I am probably not smart enough to reason about your vertically-written language. That said, Afterburner is Unicode all the way down, so in general it might be expected to approximately work. However, I make no promises about whether the UI can render your character set in an intelligible vertical order.
+A. I am probably not smart enough to reason about your vertically-written language. That said, Afterburner is Unicode all the way down, so in general it might be expected to approximately work. However, I make no promises about whether the UI can render your character set in an intelligible vertical order. See also [https://easygui.wordpress.com/2010/02/03/easygui-and-unicode/](here).
 
 
 
