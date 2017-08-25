@@ -284,7 +284,15 @@ def figure_out_when_to_study_next(users_quality_estimate):
     ## We emit as output a timestamp, representing when the phrase is next due for study
     ## At some point, this should be refactored as a real spaced-repetition algo.
     
-    users_quality_estimate = int(users_quality_estimate)
+    try:
+        users_quality_estimate = int(users_quality_estimate)
+    except TypeError: ## This is what happens when the user presses escape
+        print("The user is trying to quit the program.")
+        global keep_studying 
+        keep_studying = 0 ## TODO: FIGURE THIS OUT, CURRENTLY IT'S MAKING YOU PRESS ESCAPE ALL THROUGH THE LESSON
+        print(keep_studying)
+        return(None)
+        
     if(users_quality_estimate <= 0): ## This corresponds to both the case when the user chooses "I don't know how to say this" and also when he tries to say it, but gives himself a grade of 1.
         study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 1)
     elif(users_quality_estimate == 1):
@@ -349,7 +357,7 @@ def get_phrases_to_study(name_of_sqlite_table, current_active_lesson):
 ###################################################################################################
 ###################################################################################################
 
-def update_db(phrase, study_due_date):
+def update_phrases_db(phrase, study_due_date):
     ## In this function, we tell our sqlite db how well we're doing on this phrase
     
     conn = sqlite3.connect(path_to_sqlite_db)
@@ -372,6 +380,84 @@ def update_db(phrase, study_due_date):
     conn.close()
     return(0)
     
+###################################################################################################
+###################################################################################################
+
+def create_stats_table():
+    ## In this function, we create a table to hold statistical facts about our studies, such as
+    ## time elapsed during the study of each phrase, etc.
+    
+    conn = sqlite3.connect(path_to_sqlite_db)
+    c = conn.cursor()
+    
+    stats_table_creation_template = """
+    create table if not exists study_stats(
+        date integer not null
+      , phrase_uuid integer not null
+      , time_spent_on_this_phrase integer
+      , count_of_study_attempts_on_this_phrase integer
+    );
+    """
+    
+    params_to_sub = {}
+                   
+    update_query = pystache.render(stats_table_creation_template, params_to_sub)
+    c.execute(update_query)
+    conn.commit()
+    conn.close()
+    return(0)
+    
+###################################################################################################
+###################################################################################################
+
+def update_stats_table(phrase):
+    ## In this function, we update our study time counter table in the database. We have to hack
+    ## around sqlite's lack of upsert
+    
+    conn = sqlite3.connect(path_to_sqlite_db)
+    c = conn.cursor()
+    
+    duration_of_this_attempt = 10 ## This should be in seconds
+    count_of_study_attempts_on_this_phrase = 1
+    stats_update_template = """
+    -- Try to update any existing row
+    update study_stats
+    set 
+        time_spent_on_this_phrase = time_spent_on_this_phrase + {{duration_of_this_attempt}}
+      , count_of_study_attempts_on_this_phrase = count_of_study_attempts_on_this_phrase + 1
+    where phrase_uuid = {{relevant_uuid}}
+    and date = CURRENT_DATE
+    ;
+    """
+    
+    stats_insert_template = """
+    -- If no update happened (i.e. the row didn't exist) then insert one
+    insert into study_stats (date, phrase_uuid, time_spent_on_this_phrase, count_of_study_attempts_on_this_phrase)
+    select
+        CURRENT_DATE as date
+      , {{relevant_uuid}} as phrase_uuid
+      , {{duration_of_this_attempt}} as time_spent_on_this_phrase
+      , 1 as count_of_study_attempts_on_this_phrase
+    where
+        (select Changes() = 0)
+    ;
+    """
+    
+    ## We'll reuse these params for both of the above queries
+    params_to_sub = {'duration_of_this_attempt': duration_of_this_attempt
+                   , 'relevant_uuid' : phrase['phrase_uuid']
+                    }
+                   
+    update_query = pystache.render(stats_update_template, params_to_sub)
+    c.execute(update_query)
+    
+    insert_query = pystache.render(stats_insert_template, params_to_sub)
+    c.execute(insert_query)
+    
+    conn.commit()
+    conn.close()
+    return(0)
+        
 ###################################################################################################
 ###################################################################################################
     
@@ -495,6 +581,16 @@ def study_remedial_phrases(name_of_sqlite_table, current_active_lesson):
 ###################################################################################################
 ###################################################################################################
 
+def display_study_stats():
+    ## In this function, we display to the user a few study stats such as elapsed study duration etc
+    
+    textbox("foobar baz bang")    
+    return(0)
+
+    
+###################################################################################################
+###################################################################################################
+
 def learn_phrase(phrase):
     ## In this function, we gang up a bunch of the functions above and expose them 
     ## through a single interface
@@ -502,8 +598,9 @@ def learn_phrase(phrase):
     did_user_say_the_phrase = ask_if_user_can_say_phrase(phrase)
     users_quality_estimate = decide_what_to_do(did_user_say_the_phrase, phrase)
     delay_till_next_study = figure_out_when_to_study_next(users_quality_estimate)
-    update_db(phrase, delay_till_next_study)
-    return(phrase)
+    update_phrases_db(phrase, delay_till_next_study)
+    update_stats_table(phrase)
+    return(None)
 
 ###################################################################################################
 ###################################################################################################
@@ -516,25 +613,32 @@ if __name__ == "__main__":
     cart_config = load_cartridge_specific_config(path_to_cartridge_file) ## Figure out the names of our languages etc.
     path_to_sqlite_db = get_path_to_sqlite_db()
     name_of_sqlite_table = cart_config['cartridge_name']
+    create_stats_table()
     current_active_lesson = get_current_active_lesson(name_of_sqlite_table)
     
     ## Get a phrase to study
-    while True:
+    keep_studying = 1
+    while(keep_studying == 1):
+        print(keep_studying, 'foo')
         current_active_lesson = detect_if_new_lesson_needed(name_of_sqlite_table, current_active_lesson)
+        print('step 1')
         phrase_to_study = get_phrases_to_study(name_of_sqlite_table, current_active_lesson)
+        print('step 2')
         learn_phrase(phrase_to_study)
+        print(keep_studying, 'bar')
+    display_study_stats()
     
 ###################################################################################################
 ###################################################################################################
 ## TODO's: 
 # * Add 10 second progress bar while the user is trying to say the phrase
 # * Use a better GUI system that doesn't flicker every time you click something
-# * Figure out how to get audio from movies/tv/radio and two-language-track closed-captions, in order to prevent us from having to pay for native speakers
+# * Figure out how to get audio from movies/tv/radio and two-language-track closed-captions, in order to prevent us from having to pay for native speakers recording audio
 # DONE * Get the phraselist from http://frequencylists.blogspot.com/2016/08/5000-italian-sentences-sorted-from.html
 # * Implement a naive machine translation?
 # DONE * Build facilities for loading fully-modularized .zip file of all the .mp3's and the .csv, aka "cartridge" like in NES
-# * Print study stats, such as total hours studied, what lesson you're on, how many phrases fall into each bucket, etc.
+# * Print study stats, such as total hours studied, what lesson you're on, how many phrases fall into each bucket, etc. Also do "how many times did you study this phrase"
 # DONE * Package afterburner as a standalone program
 # DONE * Write gui for selecting cart files
 # DONE * Persist the user's most recent choice of cart file
-
+# DONE * Prevent the GUI from loading in the background, behind all the other windows. Make it load in the foreground instead. 
