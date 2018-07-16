@@ -213,7 +213,6 @@ def get_basic_study_stats(phrase_uuid):
         study_stats 
     where 
         phrase_uuid = {{phrase_uuid}}
---  phrase_uuid = 987654398765
         and date = date('now')
     """
     

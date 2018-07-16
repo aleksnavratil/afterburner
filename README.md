@@ -98,7 +98,7 @@ A. Yes :(
 
 __Q. How is this different from Language101.com's software?__
 
-A. In spirit, it's not very different, other than that their software is slightly more sophisticated than Afterburner and has a couple more features such as progress bars and study stats. The pedagogy and user experience is almost identical. The only substantial differences are as follows:
+A. In spirit, it's not very different, other than that their software is slightly more sophisticated than Afterburner and has a couple more features such as progress bars and pretty colors. The pedagogy and user experience is almost identical. The only substantial differences are as follows:
 
 * Cost. Afterburner is free, most other good language learning programs are not.
 
@@ -173,11 +173,14 @@ The contents of each cartridge file is just a bunch of .mp3's with numerical fil
 You can find the canonical list of available cartridges [here](https://www.dropbox.com/sh/6tiluiygdihrbsd/AADclk3SfdoJz2FmumKZB4dca?dl=0)
 
 
+__Q. What happens if I delete the directory containing my study database?__
+
+A. In this case, your study progress is basically lost forever, unless you can somehow undelete things from your trash. It might be worth regularly backing up the `.sqlite` file from Afterburner's working directory in some safe location(s).
 
 
-__Q. Why are there no study stats, showing e.g. my total study duration?__
+__Q. What do I do if I want to start over?__
 
-A. Will build soon, hang tight. 
+A. You can just delete Afterburner's working directory, including the `.sqlite` file, and re-unpack the cartridge file from scratch. All Afterburner's state is stored in that `.sqlite` file.
 
 
 ## How to install this software
