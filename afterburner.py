@@ -163,10 +163,6 @@ def get_basic_study_stats(phrase_uuid):
     ## In this function, we ask the study_stats table how long the user has studied today.
     ## We also ask the number of times he's studied this phrase_uuid.
     
-    ## Begin by initializing a pair of counts. These will be overwritten if they exist in the table; otherwise, we'll pass them as zeros. 
-    count_of_studies_today = 0
-    count_of_studies_overall = 0
-    
     ## We'll do total duration first.
     conn = sqlite3.connect(path_to_sqlite_db)
     conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
@@ -185,6 +181,11 @@ def get_basic_study_stats(phrase_uuid):
 
     c.execute(query)
     total_time_studied_today = c.fetchone()
+    
+    if total_time_studied_today[0] is None:
+        total_time_studied_today = 0 ## Handle the edge case wherein the user is using AB for the very first time
+    else:
+        total_time_studied_today = total_time_studied_today[0]
     conn.commit()
     
     
@@ -202,6 +203,11 @@ def get_basic_study_stats(phrase_uuid):
 
     c.execute(query)
     total_time_studied_overall = c.fetchone()
+    if total_time_studied_overall[0] is None:
+        total_time_studied_overall = 0
+    else:
+        total_time_studied_overall = total_time_studied_overall[0]
+    
     conn.commit()
     
     
@@ -221,6 +227,12 @@ def get_basic_study_stats(phrase_uuid):
 
     c.execute(query)
     count_of_studies_today = c.fetchone()
+    
+    if count_of_studies_today is None: ## Note the subtle difference from above; here we lack the [0] for complicated reasons pertaining to database conventions. 
+        count_of_studies_today = 0
+    else:
+        count_of_studies_today = count_of_studies_today[0]
+    
     conn.commit()
     
     ## Next let's ask for the count of times this phrase_uuid has been studied overall:
@@ -238,14 +250,19 @@ def get_basic_study_stats(phrase_uuid):
 
     c.execute(query)
     count_of_studies_overall = c.fetchone()
+    if count_of_studies_overall is None:  ## Note the subtle difference from above; here we lack the [0] for complicated reasons pertaining to database conventions. 
+        count_of_studies_overall = 0
+    else:
+        count_of_studies_overall = count_of_studies_overall[0]
+    
     conn.commit()
     
     conn.close()
     
-    return({"total_time_studied_today" : int(round(total_time_studied_today[0])) ## Get the actual number out of the object
-           , "total_time_studied_overall" : int(round(total_time_studied_overall[0]))
-           , "count_of_studies_today" : count_of_studies_today[0]
-           , "count_of_studies_overall" : count_of_studies_overall[0]
+    return({"total_time_studied_today" : int(round(total_time_studied_today)) ## Get the actual number out of the object
+           , "total_time_studied_overall" : int(round(total_time_studied_overall))
+           , "count_of_studies_today" : count_of_studies_today
+           , "count_of_studies_overall" : count_of_studies_overall
            })
     
 
