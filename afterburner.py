@@ -159,6 +159,97 @@ def load_cartridge_specific_config(path_to_cartridge_file):
 ###################################################################################################
 ###################################################################################################
 
+def get_basic_study_stats(phrase_uuid):
+    ## In this function, we ask the study_stats table how long the user has studied today.
+    ## We also ask the number of times he's studied this phrase_uuid.
+    
+    ## Begin by initializing a pair of counts. These will be overwritten if they exist in the table; otherwise, we'll pass them as zeros. 
+    count_of_studies_today = 0
+    count_of_studies_overall = 0
+    
+    ## We'll do total duration first.
+    conn = sqlite3.connect(path_to_sqlite_db)
+    conn.row_factory = sqlite3.Row ## Important, this allows us to get dicts instead of tuples from the db, which gives us column names in the data we get from the db
+    c = conn.cursor()
+    query_template = """
+    select
+        sum(time_spent_on_this_phrase) / 60 as total_time_spent_studying_today -- In minutes, obviously
+    from 
+        study_stats 
+    where 
+        date = date('now') -- Today alone
+    """
+    
+    params_to_sub = {} ## I leave these intentionally blank, just to make all the db interactions be uniform
+    query = pystache.render(query_template, params_to_sub)
+
+    c.execute(query)
+    total_time_studied_today = c.fetchone()
+    conn.commit()
+    
+    
+    ## We'll do total duration next:
+    c = conn.cursor()
+    query_template = """
+    select
+        sum(time_spent_on_this_phrase) / 60 as total_time_spent_studying_overall -- In minutes, obviously
+    from 
+        study_stats 
+    """
+    
+    params_to_sub = {} ## I leave these intentionally blank, just to make all the db interactions be uniform
+    query = pystache.render(query_template, params_to_sub)
+
+    c.execute(query)
+    total_time_studied_overall = c.fetchone()
+    conn.commit()
+    
+    
+    ## Next, we'll get count of studies *today* alone
+    query_template = """
+    select
+        count_of_study_attempts_on_this_phrase
+    from 
+        study_stats 
+    where 
+        phrase_uuid = {{phrase_uuid}}
+--  phrase_uuid = 987654398765
+        and date = date('now')
+    """
+    
+    params_to_sub = {'phrase_uuid' : phrase_uuid} 
+    query = pystache.render(query_template, params_to_sub)
+
+    c.execute(query)
+    count_of_studies_today = c.fetchone()
+    conn.commit()
+    
+    ## Next let's ask for the count of times this phrase_uuid has been studied overall:
+    query_template = """
+    select
+        count_of_study_attempts_on_this_phrase
+    from 
+        study_stats 
+    where 
+        phrase_uuid = {{phrase_uuid}}
+    """
+    
+    params_to_sub = {'phrase_uuid' : phrase_uuid} 
+    query = pystache.render(query_template, params_to_sub)
+
+    c.execute(query)
+    count_of_studies_overall = c.fetchone()
+    conn.commit()
+    
+    conn.close()
+    
+    return({"total_time_studied_today" : int(round(total_time_studied_today[0])) ## Get the actual number out of the object
+           , "total_time_studied_overall" : int(round(total_time_studied_overall[0]))
+           , "count_of_studies_today" : count_of_studies_today[0]
+           , "count_of_studies_overall" : count_of_studies_overall[0]
+           })
+    
+
 def ask_if_user_can_say_phrase(phrase):
     ## In this function, we ask the user whether he said the phrase at all
     ## (here we ignore how well he said it, and focus only on whether he attempted to say it at all)
@@ -172,10 +263,20 @@ def ask_if_user_can_say_phrase(phrase):
     string2 = "\nMeaning : " + phrase['phrase_in_known_language']
     string3 = "\nLiteral : " + phrase['literal_translation_from_target_language_to_known_language']
     string4 = "\n\nDid you try to say this out loud?"
-    message = string1 + string2 + string3 + string4
+    
+    ## Get various basic study-duration stats:
+    basic_study_stats = get_basic_study_stats(phrase_uuid = phrase['phrase_uuid'])
+    
+    ## Put those facts in a sensible order
+    string5 = "\n\n\n\nYou have studied this phrase " + str(basic_study_stats['count_of_studies_today']) + " times today and " + str(basic_study_stats['count_of_studies_overall']) + " times overall."
+    string6 = "\n\nYou have studied " + str(basic_study_stats['total_time_studied_today']) + " minutes today and " + str(basic_study_stats['total_time_studied_overall']) + " minutes overall."
+    
+    
+    message = string1 + string2 + string3 + string4 + string5 + string6
     title = "Afterburner"
     choices = [button_text_for_attempted_speech, button_text_for_failure_to_speak, button_text_for_quit]
     
+    ## Render the GUI
     did_user_say_the_phrase = indexbox(message, title, choices, cancel_choice = 2)
 
     if(did_user_say_the_phrase == 2): ## This is a hack, insofar as we're overloading did_user_say_the_phrase :/ But it's expedient.
@@ -291,8 +392,7 @@ def figure_out_when_to_study_next(users_quality_estimate):
     try:
         users_quality_estimate = int(users_quality_estimate)
     except TypeError: ## This is what happens when the user presses escape
-        print("The user is trying to quit the program.")
-        sys.exit(0) ## Quit immediately
+        sys.exit(0) ## Quit immediately. Possible TODO: Cause this to bring up a detailed study stats pane?
         return(None)
         
     if(users_quality_estimate <= 0): ## This corresponds to both the case when the user chooses "I don't know how to say this" and also when he tries to say it, but gives himself a grade of 1.
@@ -585,7 +685,7 @@ def study_remedial_phrases(name_of_sqlite_table, current_active_lesson):
 
 def display_study_stats():
     ## In this function, we display to the user a few study stats such as elapsed study duration etc
-    
+    ## Currently this function is unused, but I might later figure out what to do with it.
     textbox("foobar baz bang")    
     return(0)
 
@@ -626,7 +726,7 @@ if __name__ == "__main__":
         current_active_lesson = detect_if_new_lesson_needed(name_of_sqlite_table, current_active_lesson)
         phrase_to_study = get_phrases_to_study(name_of_sqlite_table, current_active_lesson)
         learn_phrase(phrase_to_study)
-    display_study_stats()
+##    display_study_stats()
     
 ###################################################################################################
 ###################################################################################################
