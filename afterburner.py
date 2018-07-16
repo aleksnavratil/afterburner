@@ -1,7 +1,7 @@
 ###################################################################################################
 ###################################################################################################
 ## afterburner.py
-## Monday 10 July 
+## Monday 10 July 2017
 ## Aleks Navratil
 ## The point of this program is to learn spoken human languages
 ## It's substantially a ripoff/extension of language-101.com
@@ -19,8 +19,8 @@ import pystache ## For sane templating
 from easygui import * ## For user interfaces
 import zipfile ## For unzipping our cartridge files
 import emoji ## For displaying emojis in the UI
-from Tkinter import Tk
-
+from Tkinter import Tk ## For hacking around with GUI's to make our UI appear on top
+import time ## For timing our study durations
 ###################################################################################################
 ###################################################################################################
 
@@ -166,6 +166,7 @@ def ask_if_user_can_say_phrase(phrase):
     ## Display a pair of buttons to determine whether the user can even say the phrase
     button_text_for_attempted_speech = "I've tried to say this out loud, show me the answer"
     button_text_for_failure_to_speak = "I don't know, show me the answer"
+    button_text_for_quit = "Quit Afterburner"
 
     string1 = "Read this " + cart_config['name_of_known_language'] + " phrase, then say the " + cart_config['name_of_target_language'] + " equivalent out loud.\n"
     string2 = "\nMeaning : " + phrase['phrase_in_known_language']
@@ -173,9 +174,12 @@ def ask_if_user_can_say_phrase(phrase):
     string4 = "\n\nDid you try to say this out loud?"
     message = string1 + string2 + string3 + string4
     title = "Afterburner"
-    choices = [button_text_for_attempted_speech, button_text_for_failure_to_speak]
+    choices = [button_text_for_attempted_speech, button_text_for_failure_to_speak, button_text_for_quit]
     
-    did_user_say_the_phrase = indexbox(message, title, choices)
+    did_user_say_the_phrase = indexbox(message, title, choices, cancel_choice = 2)
+
+    if(did_user_say_the_phrase == 2): ## This is a hack, insofar as we're overloading did_user_say_the_phrase :/ But it's expedient.
+        sys.exit(0) ## Quit the program
     # show_progress_bar() ## TODO: FIGURE OUT WHAT TO DO ABOUT THIS
     
     return(did_user_say_the_phrase)
@@ -250,7 +254,7 @@ def ask_for_user_quality_estimate(phrase):
         string4 = "\nAnswer  : " + phrase['idiomatic_translation_to_target_language']
 
         message = string1 + string2 + string3 + string4
-        title = "Afterburner"
+        title = "\xF0\x9F\x94\xA5Afterburner\xF0\x9F\x94\xA5" ## TODO: MAKE THESE EMOJIS APPEAR IN THE TITLEBAR 
         choices = ['\xF0\x9F\x98\x94Wrong\xF0\x9F\x98\x94'
                  , '\xF0\x9F\x98\xA5Some Mistakes\xF0\x9F\x98\xA5'
                  , '\xF0\x9F\x98\x96Shaky\xF0\x9F\x98\x96'
@@ -288,9 +292,7 @@ def figure_out_when_to_study_next(users_quality_estimate):
         users_quality_estimate = int(users_quality_estimate)
     except TypeError: ## This is what happens when the user presses escape
         print("The user is trying to quit the program.")
-        global keep_studying 
-        keep_studying = 0 ## TODO: FIGURE THIS OUT, CURRENTLY IT'S MAKING YOU PRESS ESCAPE ALL THROUGH THE LESSON
-        print(keep_studying)
+        sys.exit(0) ## Quit immediately
         return(None)
         
     if(users_quality_estimate <= 0): ## This corresponds to both the case when the user chooses "I don't know how to say this" and also when he tries to say it, but gives himself a grade of 1.
@@ -302,7 +304,7 @@ def figure_out_when_to_study_next(users_quality_estimate):
     elif(users_quality_estimate == 3):
         study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 8)
     elif(users_quality_estimate == 4):
-        study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 16)
+        study_due_date = datetime.datetime.now() + datetime.timedelta(minutes = 16) ## Note that this progression of constants is basically just a bunch of numbers that I made up.
     else:
         print("Something went wrong with the user's quality estimate of how well he said the phrase :(")
         study_due_date = -1  
@@ -410,14 +412,14 @@ def create_stats_table():
 ###################################################################################################
 ###################################################################################################
 
-def update_stats_table(phrase):
+def update_stats_table(phrase, time_elapsed):
     ## In this function, we update our study time counter table in the database. We have to hack
     ## around sqlite's lack of upsert
     
     conn = sqlite3.connect(path_to_sqlite_db)
     c = conn.cursor()
     
-    duration_of_this_attempt = 10 ## This should be in seconds
+    duration_of_this_attempt = time_elapsed ## This should be in seconds
     count_of_study_attempts_on_this_phrase = 1
     stats_update_template = """
     -- Try to update any existing row
@@ -437,7 +439,7 @@ def update_stats_table(phrase):
         CURRENT_DATE as date
       , {{relevant_uuid}} as phrase_uuid
       , {{duration_of_this_attempt}} as time_spent_on_this_phrase
-      , 1 as count_of_study_attempts_on_this_phrase
+      , 1 as count_of_study_attempts_on_this_phrase -- We set the count of study attempts to 1, since by definition if we're running this "insert" query, this is the first attempt to study a phrase.
     where
         (select Changes() = 0)
     ;
@@ -594,13 +596,15 @@ def display_study_stats():
 def learn_phrase(phrase):
     ## In this function, we gang up a bunch of the functions above and expose them 
     ## through a single interface
-
+    start_time = time.time() ## This is wall-clock time
     did_user_say_the_phrase = ask_if_user_can_say_phrase(phrase)
     users_quality_estimate = decide_what_to_do(did_user_say_the_phrase, phrase)
+    end_time = time.time() 
+    elapsed_time = end_time - start_time
     delay_till_next_study = figure_out_when_to_study_next(users_quality_estimate)
     update_phrases_db(phrase, delay_till_next_study)
-    update_stats_table(phrase)
-    return(None)
+    update_stats_table(phrase, elapsed_time)
+    return(0)
 
 ###################################################################################################
 ###################################################################################################
@@ -619,13 +623,9 @@ if __name__ == "__main__":
     ## Get a phrase to study
     keep_studying = 1
     while(keep_studying == 1):
-        print(keep_studying, 'foo')
         current_active_lesson = detect_if_new_lesson_needed(name_of_sqlite_table, current_active_lesson)
-        print('step 1')
         phrase_to_study = get_phrases_to_study(name_of_sqlite_table, current_active_lesson)
-        print('step 2')
         learn_phrase(phrase_to_study)
-        print(keep_studying, 'bar')
     display_study_stats()
     
 ###################################################################################################
